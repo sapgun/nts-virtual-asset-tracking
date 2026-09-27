@@ -1,33 +1,36 @@
-const modules = [
-  ["01", "Blockchain evidence", "Observed transaction facts and reproducibility"],
-  ["02", "Wallet attribution", "Why address, entity and natural person are different layers"],
-  ["03", "UTXO heuristics", "Cluster methods, CoinJoin and failure modes"],
-  ["04", "EVM tracing", "Calls, logs, token transfers and contract routing"],
-  ["05", "Mixers", "Candidate-set reduction without false certainty"],
-  ["06", "Bridges", "Message-key matching versus time/value inference"],
-  ["07", "Privacy systems", "What remains observable when fields are hidden"],
-  ["08", "Evidence standards", "Cross-validation, provenance and counter-evidence"],
+import { AcademyChallenge } from "@/components/academy-challenge";
+
+const tracks = [
+  ["Foundation", "Facts, provenance and evidence states"],
+  ["Tracing", "UTXO, EVM and flow reconstruction"],
+  ["Privacy", "Mixers, privacy systems and uncertainty"],
+  ["Cross-chain", "Bridge events and correlation"],
 ];
 
 export default function AcademyPage() {
   return (
-    <div className="content-page">
-      <header className="page-header">
+    <div className="content-page academy-page-v3">
+      <header className="page-header academy-header-v3">
         <span className="eyebrow">ACADEMY</span>
-        <h1>Learn → simulate → investigate → explain.</h1>
-        <p>The curriculum reuses the same evidence model as the analyst workspace so learning transfers directly into investigation practice.</p>
+        <h1>Learn the boundary, not just the tool.</h1>
+        <p>
+          One short field exercise at a time. The same evidence model used in the workbench is used here.
+        </p>
       </header>
 
-      <div className="academy-grid">
-        {modules.map(([number, title, body]) => (
-          <article key={number}>
-            <span>{number}</span>
-            <h2>{title}</h2>
-            <p>{body}</p>
-            <button disabled>Module scaffold</button>
+      <AcademyChallenge />
+
+      <section className="academy-track-strip">
+        {tracks.map(([title, body], index) => (
+          <article key={title}>
+            <span>{String(index + 1).padStart(2, "0")}</span>
+            <div>
+              <strong>{title}</strong>
+              <p>{body}</p>
+            </div>
           </article>
         ))}
-      </div>
+      </section>
     </div>
   );
 }

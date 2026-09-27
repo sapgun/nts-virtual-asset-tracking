@@ -3,99 +3,166 @@ import { CapabilityRegistry } from "@/components/capability-registry";
 import { StateBadge } from "@/components/state-badge";
 import { caseFiles, evidence, investigation } from "@/lib/mock-data";
 
-const modules = [
-  ["Investigation Lab", "Trace flows, test hypotheses and preserve evidence states.", "/investigations", "01"],
-  ["Graph Explorer", "Load public Ethereum observations and promote them into a draft investigation.", "/explore", "02"],
-  ["Bridge Lab", "Compare deterministic message-key links against heuristic correlation.", "/bridges", "03"],
-  ["Case Reconstruction", "Replay public cases as evidence-driven investigation sequences.", "/cases", "04"],
-  ["Evidence Room", "Separate direct facts, analytical inference and external attribution.", "/evidence", "05"],
-  ["Academy", "Learn blockchain investigation through interactive modules and cases.", "/academy", "06"],
+const launchers = [
+  {
+    number: "01",
+    eyebrow: "OBSERVE",
+    title: "Start from an address",
+    body: "Load public Ethereum transactions first. Create hypotheses only after the observations are visible.",
+    href: "/explore",
+    action: "Open explorer",
+  },
+  {
+    number: "02",
+    eyebrow: "INVESTIGATE",
+    title: "Open the workbench",
+    body: "Trace a flow, inspect evidence state, draft hypotheses and export an integrity-hashed evidence packet.",
+    href: "/investigations",
+    action: "Open investigation",
+  },
+  {
+    number: "03",
+    eyebrow: "RECONSTRUCT",
+    title: "Replay a public case",
+    body: "Walk through a curated case one evidence transition at a time instead of reading the conclusion first.",
+    href: "/cases",
+    action: "Choose a case",
+  },
 ];
 
 export default function HomePage() {
   return (
-    <div className="command-page">
-      <section className="command-hero">
-        <div className="hero-copy">
+    <div className="command-page command-page-v3">
+      <section className="command-v3-hero">
+        <div className="command-v3-copy">
           <span className="eyebrow">VIRTUAL ASSET INTELLIGENCE WORKBENCH</span>
-          <h1>Trace the flow.<br />Separate evidence from inference.</h1>
+          <h1>
+            Follow the money.
+            <br />
+            Keep the uncertainty.
+          </h1>
           <p>
-            A research-first investigation environment for reconstructing virtual-asset flows,
-            testing attribution hypotheses, and documenting what is observed, inferred, attributed,
-            or still unknown.
+            Explore public blockchain flows without collapsing an address,
+            entity and natural person into the same claim.
           </p>
-          <div className="hero-actions">
-            <Link className="primary-link" href="/investigations">Open investigation lab</Link>
-            <Link className="secondary-link" href="/research">Read preserved research</Link>
+
+          <div className="command-v3-actions">
+            <Link className="command-primary" href="/explore">
+              Start with an address <span>↗</span>
+            </Link>
+            <Link className="command-quiet" href="/research">
+              Read the technical brief
+            </Link>
           </div>
-        </div>
 
-        <div className="hero-visual" aria-hidden="true">
-          <div className="hero-core">
-            <span />
-            <span />
-            <span />
-            <i />
-          </div>
-          <div className="hero-orbit orbit-a" />
-          <div className="hero-orbit orbit-b" />
-          <div className="hero-orbit orbit-c" />
-        </div>
-      </section>
-
-      <section className="command-stats">
-        <article>
-          <span>ACTIVE CASE</span>
-          <b>{investigation.id}</b>
-          <small>{investigation.title}</small>
-        </article>
-        <article>
-          <span>EVIDENCE COMPLETENESS</span>
-          <b>{investigation.evidenceCompleteness}%</b>
-          <small>On-chain strong · off-chain incomplete</small>
-        </article>
-        <article>
-          <span>EVIDENCE ITEMS</span>
-          <b>{evidence.length}</b>
-          <small>Each item carries an explicit evidence state</small>
-        </article>
-        <article>
-          <span>CASE LIBRARY</span>
-          <b>{caseFiles.length}</b>
-          <small>Curated public-case reconstructions</small>
-        </article>
-      </section>
-
-      <section className="module-grid">
-        {modules.map(([title, body, href, number]) => (
-          <Link className="module-card" href={href} key={title}>
-            <span className="module-number">{number}</span>
+          <div className="command-v3-proof">
             <div>
-              <h2>{title}</h2>
-              <p>{body}</p>
+              <StateBadge state="OBSERVED" />
+              <span>Facts remain facts</span>
             </div>
-            <span className="module-arrow">↗</span>
-          </Link>
-        ))}
+            <i />
+            <div>
+              <StateBadge state="INFERRED" />
+              <span>Hypotheses stay explicit</span>
+            </div>
+            <i />
+            <div>
+              <StateBadge state="ATTRIBUTED" />
+              <span>Attribution needs provenance</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="command-scene" aria-hidden="true">
+          <div className="scene-plane plane-a" />
+          <div className="scene-plane plane-b" />
+          <div className="scene-orbit orbit-one" />
+          <div className="scene-orbit orbit-two" />
+
+          <div className="scene-node node-main">
+            <i />
+            <span>SEED</span>
+          </div>
+          <div className="scene-node node-a">
+            <i />
+            <span>FLOW</span>
+          </div>
+          <div className="scene-node node-b">
+            <i />
+            <span>BRIDGE</span>
+          </div>
+          <div className="scene-node node-c">
+            <i />
+            <span>VASP</span>
+          </div>
+
+          <svg viewBox="0 0 600 500" preserveAspectRatio="none">
+            <path d="M130 260 C210 210 280 210 350 160" />
+            <path d="M135 272 C225 310 310 300 430 335" />
+            <path d="M350 165 C405 205 442 242 462 316" />
+          </svg>
+
+          <div className="scene-caption caption-a">
+            <span>OBSERVED</span>
+            <b>transaction</b>
+          </div>
+          <div className="scene-caption caption-b">
+            <span>INFERRED</span>
+            <b>relationship</b>
+          </div>
+        </div>
       </section>
 
-      <section className="evidence-principle">
-        <div>
-          <span className="eyebrow">SYSTEM PRINCIPLE</span>
-          <h2>A graph edge is not a person.</h2>
+      <section className="command-v3-launch">
+        <div className="command-section-head">
+          <div>
+            <span className="eyebrow">START HERE</span>
+            <h2>One job at a time.</h2>
+          </div>
           <p>
-            The system deliberately prevents transaction relationships from becoming natural-person
-            attribution without an explicit evidence transition.
+            The interface now separates observation, investigation and
+            reconstruction instead of exposing every tool at once.
           </p>
         </div>
-        <div className="principle-flow">
-          <div><StateBadge state="OBSERVED" /><span>Transaction</span></div>
-          <i>→</i>
-          <div><StateBadge state="INFERRED" /><span>Hypothesis</span></div>
-          <i>→</i>
-          <div><StateBadge state="ATTRIBUTED" /><span>Entity</span></div>
-          <i>→</i>
-          <div><StateBadge state="UNVERIFIED" /><span>Natural person</span></div>
+
+        <div className="launcher-grid">
+          {launchers.map((item) => (
+            <Link className="launcher-card" href={item.href} key={item.number}>
+              <span className="launcher-no">{item.number}</span>
+              <div>
+                <small>{item.eyebrow}</small>
+                <h3>{item.title}</h3>
+                <p>{item.body}</p>
+              </div>
+              <strong>{item.action} ↗</strong>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section className="command-v3-status">
+        <div className="status-case">
+          <span className="eyebrow">SANDBOX SNAPSHOT</span>
+          <h2>{investigation.id}</h2>
+          <p>{investigation.title}</p>
+        </div>
+
+        <div className="status-metrics">
+          <div>
+            <span>EVIDENCE</span>
+            <b>{evidence.length}</b>
+            <small>typed items</small>
+          </div>
+          <div>
+            <span>COMPLETENESS</span>
+            <b>{investigation.evidenceCompleteness}%</b>
+            <small>evidence quality context</small>
+          </div>
+          <div>
+            <span>CASES</span>
+            <b>{caseFiles.length}</b>
+            <small>reconstruction packs</small>
+          </div>
         </div>
       </section>
 
