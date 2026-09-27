@@ -1,7 +1,12 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { useRouter } from "next/navigation";
 import { StateBadge } from "@/components/state-badge";
+import {
+  PUBLIC_IMPORT_STORAGE_KEY,
+  type ImportedInvestigationDraft,
+} from "@/lib/imported-investigation";
 
 interface PublicTx {
   hash: string;
@@ -33,7 +38,9 @@ function ethFromWei(value: string | null) {
 }
 
 export function PublicAddressExplorer() {
+  const router = useRouter();
   const [address, setAddress] = useState("");
+  const [loadedAddress, setLoadedAddress] = useState<string | null>(null);
   const [transactions, setTransactions] = useState<PublicTx[]>([]);
   const [sourceUrl, setSourceUrl] = useState<string | null>(null);
   const [state, setState] = useState<"idle" | "loading" | "done" | "error">("idle");
@@ -66,14 +73,38 @@ export function PublicAddressExplorer() {
 
       const items = (payload?.data?.items || []) as PublicTx[];
       setTransactions(items.slice(0, 25));
+      setLoadedAddress(normalized);
       setSourceUrl(items[0]?.provenance?.sourceUrl || null);
       setState("done");
     } catch (caught) {
       setTransactions([]);
+      setLoadedAddress(null);
       setSourceUrl(null);
       setError(caught instanceof Error ? caught.message : "Request failed.");
       setState("error");
     }
+  }
+
+
+  function promoteToInvestigation() {
+    if (!loadedAddress || transactions.length === 0) return;
+
+    const draft: ImportedInvestigationDraft = {
+      id: "INV-PUBLIC-" + Date.now().toString(36).toUpperCase(),
+      title: "Public Ethereum Observation",
+      seed: loadedAddress,
+      chain: "ethereum",
+      createdAt: new Date().toISOString(),
+      source: "public-explorer",
+      transactions,
+    };
+
+    sessionStorage.setItem(
+      PUBLIC_IMPORT_STORAGE_KEY,
+      JSON.stringify(draft),
+    );
+
+    router.push("/investigations?import=public");
   }
 
   return (
@@ -111,7 +142,14 @@ export function PublicAddressExplorer() {
               <span className="eyebrow">NORMALIZED TRANSACTIONS</span>
               <strong>{transactions.length} transactions loaded</strong>
             </div>
-            <StateBadge state="OBSERVED" />
+            <div className="results-actions">
+              <StateBadge state="OBSERVED" />
+              {transactions.length > 0 && (
+                <button onClick={promoteToInvestigation}>
+                  Promote to investigation ↗
+                </button>
+              )}
+            </div>
           </div>
 
           {transactions.length === 0 ? (
