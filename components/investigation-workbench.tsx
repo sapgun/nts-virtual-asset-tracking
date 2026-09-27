@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { ActivityTimeline, type InvestigationActivity } from "@/components/activity-timeline";
 import { EvidencePanel } from "@/components/evidence-panel";
 import { GraphCanvas } from "@/components/graph-canvas";
 import { StateBadge } from "@/components/state-badge";
@@ -31,6 +32,18 @@ export function InvestigationWorkbench({
     useState<ImportedInvestigationModel | null>(null);
   const [importError, setImportError] = useState("");
   const [exporting, setExporting] = useState(false);
+  const [activity, setActivity] = useState<InvestigationActivity[]>([]);
+
+  function logActivity(item: Omit<InvestigationActivity, "id" | "timestamp">) {
+    setActivity((current) => [
+      ...current,
+      {
+        ...item,
+        id: crypto.randomUUID(),
+        timestamp: new Date().toISOString(),
+      },
+    ].slice(-40));
+  }
 
   useEffect(() => {
     if (!importedMode) return;
@@ -50,6 +63,16 @@ export function InvestigationWorkbench({
       setImportedModel(model);
       setSelectedId(model.nodes[0]?.id ?? "");
       setStep(1);
+      setActivity([
+        {
+          id: crypto.randomUUID(),
+          type: "IMPORT",
+          title: "Public observation promoted",
+          detail: model.investigation.seed + " imported from Graph Explorer.",
+          timestamp: new Date().toISOString(),
+          state: "OBSERVED",
+        },
+      ]);
     } catch (error) {
       setImportError(
         error instanceof Error
@@ -168,20 +191,40 @@ export function InvestigationWorkbench({
             min="1"
             max={maxStep}
             value={Math.min(step, maxStep)}
-            onChange={(event) => setStep(Number(event.target.value))}
+            onChange={(event) => {
+              const next = Number(event.target.value);
+              setStep(next);
+              logActivity({
+                type: "STEP",
+                title: "Playback moved",
+                detail: "Graph timeline moved to step " + next + ".",
+              });
+            }}
           />
           <div className="button-row">
             <button
-              onClick={() =>
-                setStep((current) => Math.max(1, current - 1))
-              }
+              onClick={() => {
+                const next = Math.max(1, step - 1);
+                setStep(next);
+                logActivity({
+                  type: "STEP",
+                  title: "Playback moved",
+                  detail: "Graph timeline moved to step " + next + ".",
+                });
+              }}
             >
               Back
             </button>
             <button
-              onClick={() =>
-                setStep((current) => Math.min(maxStep, current + 1))
-              }
+              onClick={() => {
+                const next = Math.min(maxStep, step + 1);
+                setStep(next);
+                logActivity({
+                  type: "STEP",
+                  title: "Next hop revealed",
+                  detail: "Graph timeline advanced to step " + next + ".",
+                });
+              }}
             >
               Next hop
             </button>
@@ -224,14 +267,42 @@ export function InvestigationWorkbench({
         edges={model.edges}
         step={step}
         selectedId={selected.id}
-        onSelect={(node: GraphNode) => setSelectedId(node.id)}
+        onSelect={(node: GraphNode) => {
+          setSelectedId(node.id);
+          logActivity({
+            type: "NODE_SELECT",
+            title: "Node selected",
+            detail: node.label + " · " + node.state,
+            state: node.state,
+          });
+        }}
       />
 
       <EvidencePanel
         selected={selected}
         evidence={model.evidence}
         hypothesis={model.hypothesis}
+        onHypothesisCreate={({ hypothesis, createdAt }) => {
+          setActivity((current) => [
+            ...current,
+            {
+              id: crypto.randomUUID(),
+              type: "HYPOTHESIS",
+              title: "Hypothesis drafted",
+              detail:
+                hypothesis.claim +
+                " · " +
+                Math.round(hypothesis.confidence * 100) +
+                "% · " +
+                hypothesis.state,
+              timestamp: createdAt,
+              state: hypothesis.state,
+            },
+          ].slice(-40));
+        }}
       />
+
+      <ActivityTimeline items={activity} />
     </div>
   );
 }
