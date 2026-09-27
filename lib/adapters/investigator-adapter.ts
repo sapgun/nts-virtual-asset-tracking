@@ -1,5 +1,6 @@
 import type {
   EvidenceItem,
+  EvidenceState,
   GraphNode,
   Hypothesis,
 } from "@/lib/domain";
@@ -21,9 +22,18 @@ export interface InvestigatorRequest {
   context: InvestigatorContext;
 }
 
+export interface InvestigatorCitation {
+  evidenceId: string;
+  title: string;
+  state: EvidenceState;
+  sourceType: EvidenceItem["sourceType"];
+  source?: string;
+}
+
 export interface InvestigatorResponse {
   answer: string;
   evidenceRefs: string[];
+  citations: InvestigatorCitation[];
   cautions: string[];
   generatedBy: string;
 }
