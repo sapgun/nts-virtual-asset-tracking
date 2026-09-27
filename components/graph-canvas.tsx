@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import type { GraphEdge, GraphNode } from "@/lib/domain";
 
 const nodeClass: Record<GraphNode["kind"], string> = {
@@ -37,6 +37,7 @@ export function GraphCanvas({
   );
 
   const visibleEdges = edges.filter((edge) => edge.step <= step);
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
 
   return (
     <section className="graph-panel graph-panel-v3">
@@ -52,7 +53,26 @@ export function GraphCanvas({
         </div>
       </div>
 
-      <div className="graph-stage graph-stage-v3">
+      <div
+        className="graph-stage graph-stage-v3"
+        style={{
+          ["--graph-rx" as string]: tilt.y + "deg",
+          ["--graph-ry" as string]: tilt.x + "deg",
+        }}
+        onPointerMove={(event) => {
+          if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+          const rect = event.currentTarget.getBoundingClientRect();
+          const px = (event.clientX - rect.left) / rect.width - 0.5;
+          const py = (event.clientY - rect.top) / rect.height - 0.5;
+          setTilt({
+            x: Number((px * 1.8).toFixed(2)),
+            y: Number((-py * 1.3).toFixed(2)),
+          });
+        }}
+        onPointerLeave={() => setTilt({ x: 0, y: 0 })}
+      >
+        <div className="graph-depth-plane depth-plane-a" />
+        <div className="graph-depth-plane depth-plane-b" />
         <svg viewBox="0 0 900 520" role="img" aria-label="Investigation transaction graph">
           <defs>
             <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
