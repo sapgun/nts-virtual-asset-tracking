@@ -4,13 +4,16 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
-const items = [
+const primary = [
   ["/", "Command"],
-  ["/investigations", "Investigation Lab"],
-  ["/explore", "Graph Explorer"],
-  ["/bridges", "Bridge Lab"],
-  ["/cases", "Case Files"],
-  ["/evidence", "Evidence Room"],
+  ["/investigations", "Investigate"],
+  ["/evidence", "Evidence"],
+] as const;
+
+const secondary = [
+  ["/explore", "Explorer"],
+  ["/bridges", "Bridge"],
+  ["/cases", "Cases"],
   ["/academy", "Academy"],
   ["/research", "Research"],
 ] as const;
@@ -18,39 +21,54 @@ const items = [
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
+  const active = (href: string) =>
+    href === "/" ? pathname === "/" : pathname.startsWith(href);
+
   return (
-    <div className="shell">
-      <aside className="sidebar">
-        <Link className="brand" href="/">
-          <span className="brand-mark">N</span>
+    <div className="shell shell-v2">
+      <header className="topbar">
+        <Link className="topbar-brand" href="/">
+          <span className="brand-sigil">
+            <i />
+            <b>N</b>
+          </span>
           <span>
-            <b>NTS // INTEL</b>
-            <small>Virtual Asset Workbench</small>
+            <strong>NTS // INTEL</strong>
+            <small>Evidence-aware chain intelligence</small>
           </span>
         </Link>
 
-        <nav className="app-nav" aria-label="Primary">
-          {items.map(([href, label]) => {
-            const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
-            return (
-              <Link key={href} className={active ? "active" : ""} href={href}>
-                <span className="nav-dot" />
-                {label}
-              </Link>
-            );
-          })}
+        <nav className="topbar-primary" aria-label="Primary">
+          {primary.map(([href, label]) => (
+            <Link
+              key={href}
+              href={href}
+              className={active(href) ? "active" : ""}
+            >
+              {label}
+            </Link>
+          ))}
         </nav>
 
-        <div className="sidebar-foot">
-          <span className="live-dot" />
-          <div>
-            <b>SAFE MODE</b>
-            <small>Public + curated safe data</small>
-          </div>
-        </div>
-      </aside>
+        <nav className="topbar-secondary" aria-label="Labs and library">
+          {secondary.map(([href, label]) => (
+            <Link
+              key={href}
+              href={href}
+              className={active(href) ? "active" : ""}
+            >
+              {label}
+            </Link>
+          ))}
+        </nav>
 
-      <main className="app-main">{children}</main>
+        <div className="topbar-mode">
+          <span />
+          SAFE MODE
+        </div>
+      </header>
+
+      <main className="app-main app-main-v2">{children}</main>
     </div>
   );
 }
