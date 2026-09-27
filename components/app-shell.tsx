@@ -7,6 +7,7 @@ import type { ReactNode } from "react";
 const items = [
   ["/", "Command"],
   ["/investigations", "Investigation Lab"],
+  ["/explore", "Graph Explorer"],
   ["/cases", "Case Files"],
   ["/evidence", "Evidence Room"],
   ["/academy", "Academy"],
