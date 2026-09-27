@@ -1,4 +1,5 @@
 import { EvidenceAuditTrail } from "@/components/evidence-audit-trail";
+import { EvidenceQualityCard } from "@/components/evidence-quality-card";
 import { StateBadge } from "@/components/state-badge";
 import { evidenceTransitionLedger } from "@/lib/evidence-audit-data";
 import { evidence, hypotheses, investigation } from "@/lib/mock-data";
@@ -26,6 +27,11 @@ export default function EvidencePage() {
           <b>{hypotheses.length}</b>
         </div>
       </section>
+
+      <EvidenceQualityCard
+        evidence={evidence}
+        hypothesis={hypotheses[0]}
+      />
 
       <div className="evidence-table">
         {evidence.map((item) => (
