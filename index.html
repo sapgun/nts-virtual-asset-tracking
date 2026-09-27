@@ -1,0 +1,1138 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" content="#eef2f5" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#0d1318" media="(prefers-color-scheme: dark)" />
+  <link rel="icon" href="data:," />
+  <title>국세청 가상자산 추적 기술 심층 분석</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --paper: #eef2f5;
+      --surface: #ffffff;
+      --surface-2: #e5ebef;
+      --ink: #111820;
+      --muted: #4f5e68;
+      --line: #c9d3da;
+      --navy: #153e60;
+      --blue: #176fa0;
+      --blue-soft: #dceef7;
+      --teal: #087f72;
+      --teal-soft: #d9eee9;
+      --amber: #9a5d00;
+      --amber-soft: #f8e8c8;
+      --red: #9e372f;
+      --red-soft: #f5ddda;
+      --shadow: 0 14px 38px rgba(19, 42, 58, .08);
+      --r-sm: 8px;
+      --r-md: 14px;
+      --r-lg: 22px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --paper: #0d1318;
+        --surface: #151d23;
+        --surface-2: #1b2730;
+        --ink: #eff5f7;
+        --muted: #b7c4cb;
+        --line: #31434e;
+        --navy: #9bc9e8;
+        --blue: #69b5df;
+        --blue-soft: #18394b;
+        --teal: #69d2c1;
+        --teal-soft: #173d38;
+        --amber: #f2bd60;
+        --amber-soft: #43351d;
+        --red: #f0968d;
+        --red-soft: #432724;
+        --shadow: 0 16px 44px rgba(0,0,0,.28);
+      }
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
+      line-height: 1.62;
+      overflow-wrap: anywhere;
+    }
+    a { color: var(--blue); text-underline-offset: 3px; }
+    a:hover { text-decoration-thickness: 2px; }
+    button { font: inherit; }
+    .wrap { width: min(1180px, calc(100% - 40px)); margin: 0 auto; }
+    .masthead {
+      padding: 54px 0 30px;
+      border-bottom: 1px solid var(--line);
+      background:
+        linear-gradient(90deg, transparent 0 62%, color-mix(in srgb, var(--blue-soft) 55%, transparent) 62% 100%);
+    }
+    .issue-line { display:flex; justify-content:space-between; gap:18px; align-items:center; color:var(--muted); font-size:13px; margin-bottom:32px; }
+    .issue-line span:first-child { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    h1 { font-size: clamp(34px, 6vw, 68px); line-height: 1.04; letter-spacing: -.055em; max-width: 900px; margin: 0; }
+    .dek { max-width: 790px; font-size: clamp(17px, 2vw, 22px); line-height:1.55; color:var(--muted); margin:22px 0 0; }
+    .thesis { margin-top: 36px; padding: 19px 22px; background: var(--ink); color:var(--paper); max-width: 920px; border-radius: var(--r-sm); display:flex; gap:14px; align-items:flex-start; }
+    .thesis strong { color: #fff; }
+    @media (prefers-color-scheme: dark) { .thesis { background:#e6eef2; color:#19232a; } .thesis strong { color:#0c1419; } }
+    .thesis-mark { flex:0 0 28px; height:28px; display:grid; place-items:center; background:var(--amber); color:#fff; border-radius:50%; font-weight:800; }
+    .metrics { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line); border:1px solid var(--line); margin-top:34px; }
+    .metric { background:var(--surface); padding:22px; min-height:142px; }
+    .metric b { display:block; font-size:clamp(29px,3vw,43px); line-height:1.05; letter-spacing:-.05em; color:var(--navy); }
+    .metric span { display:block; margin-top:10px; font-size:14px; color:var(--muted); }
+    .metric small { display:block; font-size:11px; margin-top:8px; color:var(--muted); }
+    .nav-shell { position:sticky; top:0; z-index:20; background:color-mix(in srgb, var(--paper) 92%, transparent); backdrop-filter:blur(12px); border-bottom:1px solid var(--line); }
+    nav { display:flex; gap:8px; overflow:auto; padding:10px 0; scrollbar-width:none; }
+    nav::-webkit-scrollbar { display:none; }
+    nav a { flex:0 0 auto; padding:8px 11px; color:var(--muted); font-size:13px; text-decoration:none; border-radius:999px; }
+    nav a:hover, nav a:focus { background:var(--surface-2); color:var(--ink); }
+    section { padding:64px 0 0; scroll-margin-top:70px; }
+    .section-head { display:grid; grid-template-columns:200px 1fr; gap:30px; margin-bottom:28px; }
+    .section-no { font:700 12px/1.2 ui-monospace, monospace; color:var(--blue); padding-top:9px; letter-spacing:.08em; }
+    h2 { font-size:clamp(28px,4vw,44px); line-height:1.12; letter-spacing:-.04em; margin:0; }
+    .section-head p { max-width:760px; margin:12px 0 0; color:var(--muted); }
+    .legend { display:flex; flex-wrap:wrap; gap:8px; margin:18px 0 0; }
+    .tag { display:inline-flex; align-items:center; gap:6px; padding:4px 8px; border-radius:999px; font-size:11px; font-weight:750; white-space:nowrap; }
+    .tag::before { content:""; width:7px; height:7px; border-radius:50%; background:currentColor; }
+    .verified { color:var(--teal); background:var(--teal-soft); }
+    .inferred { color:var(--blue); background:var(--blue-soft); }
+    .unknown { color:var(--amber); background:var(--amber-soft); }
+    .false { color:var(--red); background:var(--red-soft); }
+    .correction-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .correction { background:var(--surface); border:1px solid var(--line); padding:20px; border-radius:var(--r-md); }
+    .correction .from { color:var(--red); text-decoration:line-through; font-weight:700; }
+    .correction .to { display:block; margin-top:9px; font-weight:750; font-size:18px; }
+    .correction p { margin:8px 0 0; color:var(--muted); font-size:14px; }
+    .source-link { font-size:12px; font-weight:700; white-space:nowrap; }
+    .arch-shell { display:grid; grid-template-columns:minmax(0,1.45fr) minmax(280px,.55fr); gap:18px; align-items:start; }
+    .pipeline { display:grid; gap:8px; }
+    .stage {
+      width:100%; text-align:left; border:1px solid var(--line); background:var(--surface); color:var(--ink); padding:18px 18px; border-radius:var(--r-sm); cursor:pointer; display:grid; grid-template-columns:54px 1fr auto; gap:14px; align-items:center;
+    }
+    .stage:hover, .stage[aria-selected="true"] { border-color:var(--blue); background:var(--blue-soft); }
+    .stage-num { font:700 12px ui-monospace, monospace; color:var(--blue); }
+    .stage strong { display:block; font-size:16px; }
+    .stage small { color:var(--muted); }
+    .stage .arrow { font-size:20px; color:var(--blue); }
+    .stage-panel { position:sticky; top:74px; padding:24px; background:var(--navy); color:#fff; border-radius:var(--r-lg) var(--r-sm) var(--r-lg) var(--r-sm); box-shadow:var(--shadow); }
+    @media (prefers-color-scheme: dark) { .stage-panel { color:#10212b; } }
+    .stage-panel .kicker { opacity:.72; font:700 11px ui-monospace,monospace; letter-spacing:.08em; }
+    .stage-panel h3 { margin:14px 0 8px; font-size:24px; line-height:1.18; }
+    .stage-panel p { margin:0; font-size:14px; }
+    .stage-panel ul { padding-left:18px; margin:15px 0 0; font-size:13px; }
+    .truth-note { margin-top:15px; border-top:1px solid rgba(255,255,255,.28); padding-top:14px; font-size:12px; opacity:.82; }
+    @media (prefers-color-scheme: dark) { .truth-note { border-color:rgba(0,0,0,.2); } }
+    .split { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+    .panel { background:var(--surface); border:1px solid var(--line); padding:24px; border-radius:var(--r-md); }
+    .panel h3 { margin:0 0 8px; font-size:22px; }
+    .panel p { color:var(--muted); margin:6px 0; }
+    .panel dl { margin:18px 0 0; }
+    .panel dt { font-size:12px; color:var(--muted); margin-top:12px; }
+    .panel dd { margin:2px 0 0; font-weight:700; }
+    .versus { display:grid; grid-template-columns:1fr 56px 1fr; gap:12px; align-items:stretch; }
+    .versus .vs { display:grid; place-items:center; font:800 12px ui-monospace,monospace; color:var(--muted); }
+    .contract { background:var(--surface); border-top:4px solid var(--blue); padding:24px; }
+    .contract:nth-child(3) { border-color:var(--teal); }
+    .contract .amount { font-size:35px; line-height:1; letter-spacing:-.04em; color:var(--navy); font-weight:800; }
+    .contract h3 { margin:12px 0 6px; font-size:20px; }
+    .contract ul { margin:12px 0 0; padding-left:18px; color:var(--muted); font-size:14px; }
+    .track-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+    .track-card { background:var(--surface); border:1px solid var(--line); padding:22px; min-height:310px; border-radius:var(--r-md) var(--r-md) var(--r-sm) var(--r-sm); }
+    .track-card .code { font:700 12px ui-monospace,monospace; color:var(--blue); }
+    .track-card h3 { margin:12px 0; font-size:23px; }
+    .track-card ol { padding-left:19px; margin:0; color:var(--muted); font-size:14px; }
+    .track-card li + li { margin-top:8px; }
+    .demix { margin-top:18px; background:var(--ink); color:var(--paper); padding:28px; border-radius:var(--r-sm); }
+    @media (prefers-color-scheme: dark) { .demix { background:#e8eff3; color:#162029; } }
+    .demix h3 { margin:0 0 18px; font-size:24px; }
+    .demix-flow { display:grid; grid-template-columns:repeat(5,1fr); gap:9px; }
+    .demix-step { padding:14px; background:color-mix(in srgb, var(--paper) 10%, transparent); border:1px solid color-mix(in srgb, var(--paper) 22%, transparent); border-radius:var(--r-sm); font-size:13px; }
+    .demix-step b { display:block; font:700 11px ui-monospace,monospace; color:var(--amber); margin-bottom:6px; }
+    .demix .caveat { margin:18px 0 0; padding-top:16px; border-top:1px solid color-mix(in srgb, var(--paper) 24%, transparent); font-size:13px; }
+    .deep-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+    .deep-card { background:var(--surface); border:1px solid var(--line); padding:22px; border-radius:var(--r-sm); }
+    .deep-card.wide { grid-column:1 / -1; }
+    .deep-card h3 { margin:8px 0 10px; font-size:21px; }
+    .deep-card p { margin:7px 0; color:var(--muted); font-size:14px; }
+    .deep-card ul, .deep-card ol { margin:12px 0 0; padding-left:19px; color:var(--muted); font-size:14px; }
+    .deep-card li + li { margin-top:7px; }
+    .formula { margin:12px 0; padding:13px 15px; background:var(--surface-2); border-radius:var(--r-sm); font:600 12px/1.7 ui-monospace,SFMono-Regular,Menlo,monospace; overflow-wrap:anywhere; }
+    .signal-stack { display:grid; gap:7px; margin-top:14px; }
+    .signal { display:grid; grid-template-columns:120px 1fr auto; gap:12px; align-items:center; padding:10px 12px; background:var(--surface-2); font-size:13px; }
+    .signal code { color:var(--blue); font-weight:800; }
+    .signal span:nth-child(2) { color:var(--muted); }
+    .confidence { font:700 10px ui-monospace,monospace; white-space:nowrap; }
+    .technical-table { width:100%; border-collapse:collapse; margin-top:12px; font-size:13px; }
+    .technical-table th, .technical-table td { padding:11px 12px; border:1px solid var(--line); text-align:left; vertical-align:top; }
+    .technical-table th { background:var(--surface-2); color:var(--navy); }
+    .technical-table td { color:var(--muted); }
+    .technical-table td:first-child { color:var(--ink); font-weight:700; }
+    .metric-bars { display:grid; gap:9px; margin-top:14px; }
+    .metric-bar { display:grid; grid-template-columns:110px minmax(120px,1fr) 58px; gap:10px; align-items:center; font-size:12px; }
+    .bar-track { height:9px; background:var(--surface-2); overflow:hidden; border-radius:999px; }
+    .bar-fill { height:100%; background:var(--blue); }
+    .chain-key { display:grid; grid-template-columns:1fr 30px 1fr; gap:10px; align-items:center; margin-top:10px; }
+    .chain-node { padding:13px; background:var(--surface-2); border-radius:var(--r-sm); font-size:12px; }
+    .chain-node b { display:block; color:var(--navy); margin-bottom:4px; }
+    .chain-arrow { text-align:center; color:var(--blue); font-weight:800; }
+    .visibility { display:grid; grid-template-columns:repeat(3,1fr); gap:1px; margin-top:18px; background:var(--line); border:1px solid var(--line); }
+    .visibility article { background:var(--surface); padding:19px; }
+    .visibility h3 { margin:0 0 10px; font-size:17px; }
+    .visibility ul { margin:0; padding-left:18px; color:var(--muted); font-size:13px; }
+    .visibility li + li { margin-top:7px; }
+    .ops-flow { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px; counter-reset:ops; }
+    .ops-step { counter-increment:ops; background:var(--surface); border:1px solid var(--line); padding:16px; min-height:176px; }
+    .ops-step::before { content:"0" counter(ops); display:block; font:800 11px ui-monospace,monospace; color:var(--blue); margin-bottom:8px; }
+    .ops-step b { display:block; font-size:14px; line-height:1.35; }
+    .ops-step p { margin:7px 0 0; color:var(--muted); font-size:12px; }
+    .io-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; margin-top:18px; }
+    .io-card { background:var(--surface); border:1px solid var(--line); padding:20px; border-radius:var(--r-sm); }
+    .io-card h3 { margin:8px 0 12px; font-size:20px; }
+    .io-line { display:grid; grid-template-columns:88px 1fr; gap:10px; padding:8px 0; border-top:1px solid var(--line); font-size:13px; }
+    .io-line:first-of-type { border-top:0; }
+    .io-line b { color:var(--navy); font:700 11px ui-monospace,monospace; }
+    .io-line span { color:var(--muted); }
+    .vendor-table td:nth-child(2), .vendor-table td:nth-child(3) { min-width:220px; }
+    .academy-band { display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line); border:1px solid var(--line); margin-bottom:18px; }
+    .academy-stat { background:var(--surface); padding:18px; }
+    .academy-stat b { display:block; color:var(--navy); font-size:26px; line-height:1.15; letter-spacing:-.035em; }
+    .academy-stat span { display:block; color:var(--muted); font-size:12px; margin-top:7px; }
+    .education-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+    .academy-card { background:var(--surface); border:1px solid var(--line); padding:22px; border-radius:var(--r-sm); }
+    .academy-card h3 { margin:9px 0 6px; font-size:22px; }
+    .academy-card p { margin:7px 0; color:var(--muted); font-size:14px; }
+    .module-list { display:grid; gap:7px; margin-top:14px; }
+    .module-row { display:grid; grid-template-columns:96px 1fr; gap:11px; padding:10px 12px; background:var(--surface-2); font-size:13px; }
+    .module-row b { color:var(--navy); font:750 11px/1.5 ui-monospace,monospace; }
+    .module-row span { color:var(--muted); }
+    .training-run { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px; margin-top:18px; counter-reset:training; }
+    .training-step { counter-increment:training; padding:15px; background:var(--surface); border-top:3px solid var(--blue); min-height:148px; }
+    .training-step::before { content:"0" counter(training); display:block; font:800 10px ui-monospace,monospace; color:var(--blue); margin-bottom:7px; }
+    .training-step b { display:block; font-size:13px; line-height:1.4; }
+    .training-step p { margin:6px 0 0; color:var(--muted); font-size:12px; }
+    .codebook { display:grid; gap:12px; }
+    .code-unit { display:grid; grid-template-columns:minmax(210px,.72fr) minmax(0,1.28fr); background:var(--surface); border:1px solid var(--line); }
+    .code-unit > div { padding:20px; }
+    .code-unit > div + div { border-left:1px solid var(--line); }
+    .code-unit h3 { margin:7px 0 8px; font-size:19px; }
+    .code-unit p { margin:5px 0; color:var(--muted); font-size:13px; }
+    .code-unit pre { margin:0; white-space:pre-wrap; overflow-wrap:anywhere; font:600 11.5px/1.65 ui-monospace,SFMono-Regular,Menlo,monospace; color:var(--ink); }
+    .evidence-strip { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line); border:1px solid var(--line); margin-top:14px; }
+    .evidence-strip div { background:var(--surface); padding:15px; }
+    .evidence-strip b { display:block; color:var(--navy); font-size:13px; }
+    .evidence-strip span { display:block; margin-top:5px; color:var(--muted); font-size:11px; }
+    .case-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+    .case-card { background:var(--surface); border:1px solid var(--line); padding:22px; border-radius:var(--r-sm); }
+    .case-card h3 { margin:8px 0 12px; font-size:22px; }
+    .case-card ol { margin:0; padding-left:19px; color:var(--muted); font-size:14px; }
+    .case-card li + li { margin-top:7px; }
+    .case-card .decision { margin-top:14px; padding-top:12px; border-top:1px solid var(--line); color:var(--ink); font-size:13px; }
+    .cap-list { display:grid; gap:1px; background:var(--line); border:1px solid var(--line); }
+    .cap-row { display:grid; grid-template-columns:200px 100px 1fr; gap:16px; padding:16px; background:var(--surface); align-items:start; }
+    .cap-row strong { font-size:14px; }
+    .cap-row p { margin:0; font-size:14px; color:var(--muted); }
+    .risk-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
+    .risk { background:var(--surface); border:1px solid var(--line); padding:22px; border-radius:var(--r-sm); }
+    .risk .severity { font:700 11px ui-monospace,monospace; color:var(--amber); }
+    .risk h3 { margin:8px 0; font-size:21px; }
+    .risk p { color:var(--muted); margin:0; font-size:14px; }
+    .timeline { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+    .time-card { position:relative; background:var(--surface); border:1px solid var(--line); padding:22px; border-radius:var(--r-sm); }
+    .time-card .year { font:800 31px ui-monospace,monospace; color:var(--navy); }
+    .time-card h3 { margin:8px 0 3px; font-size:17px; }
+    .time-card p { color:var(--muted); margin:0; font-size:14px; }
+    .seizure { display:grid; grid-template-columns:repeat(6,1fr); gap:8px; counter-reset:step; }
+    .seizure-step { background:var(--surface); border-top:3px solid var(--teal); padding:17px 14px; min-height:160px; counter-increment:step; }
+    .seizure-step::before { content:"0" counter(step); display:block; font:700 11px ui-monospace,monospace; color:var(--teal); margin-bottom:9px; }
+    .seizure-step b { font-size:14px; }
+    .seizure-step p { color:var(--muted); font-size:12px; margin:7px 0 0; }
+
+    .sim-layout { display:grid; grid-template-columns:280px minmax(0,1fr); gap:14px; align-items:start; }
+    .sim-controls { background:var(--surface); border:1px solid var(--line); padding:20px; border-radius:var(--r-sm); }
+    .sim-controls h3 { margin:0 0 6px; font-size:18px; }
+    .sim-controls > p { margin:0 0 17px; color:var(--muted); font-size:12px; }
+    .sim-levels { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:14px; }
+    .level-btn { border:1px solid var(--line); background:var(--surface); color:var(--ink); padding:13px 14px; border-radius:var(--r-sm); cursor:pointer; text-align:left; }
+    .level-btn b { display:block; color:var(--navy); font-size:14px; }
+    .level-btn span { display:block; margin-top:3px; color:var(--muted); font-size:11px; }
+    .level-btn[aria-pressed="true"] { background:var(--navy); border-color:var(--navy); }
+    .level-btn[aria-pressed="true"] b, .level-btn[aria-pressed="true"] span { color:#fff; }
+    @media (prefers-color-scheme: dark) { .level-btn[aria-pressed="true"] b, .level-btn[aria-pressed="true"] span { color:#10212b; } }
+    .level-summary { margin:-2px 0 14px; padding:10px 12px; background:var(--blue-soft); color:var(--navy); border-radius:var(--r-sm); font-size:12px; }
+    .simulator[data-level="1"] .level-2, .simulator[data-level="1"] .level-3, .simulator[data-level="2"] .level-3 { display:none !important; }
+    .toggle-set { display:flex; flex-wrap:wrap; gap:6px; }
+    .toggle-btn { border:1px solid var(--line); background:var(--surface); color:var(--muted); border-radius:999px; padding:7px 10px; cursor:pointer; font-size:11px; font-weight:750; }
+    .toggle-btn[aria-pressed="true"] { background:var(--teal-soft); color:var(--teal); border-color:var(--teal); }
+    .advanced-box { margin-top:15px; padding-top:14px; border-top:1px solid var(--line); }
+    .select-row { display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center; margin-top:8px; }
+    .select-row select { width:100%; border:1px solid var(--line); background:var(--surface); color:var(--ink); border-radius:var(--r-sm); padding:8px; font:inherit; font-size:12px; }
+    .risk-readout { display:grid; grid-template-columns:auto minmax(90px,150px) auto; gap:8px; align-items:center; margin-top:10px; color:var(--muted); font-size:11px; }
+    .risk-track { height:7px; background:var(--surface-2); border-radius:999px; overflow:hidden; }
+    .risk-fill { display:block; height:100%; width:0; background:var(--amber); transition:width .2s; }
+    .risk-value { color:var(--navy); font:800 11px ui-monospace,monospace; }
+    .level-cap { margin-top:7px; color:var(--muted); font-size:11px; }
+    .sim-label { display:block; margin:16px 0 7px; color:var(--muted); font:750 10px ui-monospace,monospace; letter-spacing:.06em; }
+    .scenario-set { display:grid; gap:6px; }
+    .scenario-btn, .sim-action { border:1px solid var(--line); background:var(--surface); color:var(--ink); padding:10px 11px; border-radius:var(--r-sm); cursor:pointer; text-align:left; font-weight:700; font-size:13px; }
+    .scenario-btn:hover, .scenario-btn:focus-visible, .scenario-btn[aria-pressed="true"] { border-color:var(--blue); background:var(--blue-soft); color:var(--navy); }
+    .threshold-row { display:grid; grid-template-columns:1fr auto; gap:10px; align-items:center; }
+    .threshold-row output { min-width:42px; color:var(--navy); font:800 12px ui-monospace,monospace; }
+    .threshold-row input { width:100%; accent-color:var(--blue); }
+    .sim-actions { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:16px; }
+    .sim-action { text-align:center; }
+    .sim-action.primary { background:var(--navy); border-color:var(--navy); color:var(--paper); }
+    @media (prefers-color-scheme: dark) { .sim-action.primary { color:#10212b; } }
+    .sim-action:disabled { cursor:not-allowed; opacity:.45; }
+    .sim-legend { display:grid; grid-template-columns:1fr 1fr; gap:7px 10px; margin-top:17px; font-size:11px; color:var(--muted); }
+    .sim-legend span { display:flex; gap:7px; align-items:center; }
+    .sim-dot { width:9px; height:9px; border-radius:50%; flex:0 0 auto; }
+    .sim-dot.observed { background:var(--blue); }
+    .sim-dot.inferred { background:var(--amber); }
+    .sim-dot.leverage { background:var(--teal); }
+    .sim-dot.filtered { background:var(--surface-2); border:1px dashed var(--muted); }
+    .sim-main { min-width:0; }
+    .sim-canvas { background:var(--surface); border:1px solid var(--line); border-radius:var(--r-sm); overflow:hidden; }
+    .sim-topline { display:flex; justify-content:space-between; gap:12px; align-items:start; padding:17px 18px; border-bottom:1px solid var(--line); }
+    .sim-topline h3 { margin:0; font-size:19px; }
+    .sim-topline p { margin:4px 0 0; color:var(--muted); font-size:12px; }
+    .sim-step-count { flex:0 0 auto; color:var(--blue); font:800 11px ui-monospace,monospace; }
+    .graph-wrap { position:relative; width:100%; min-height:430px; background-image:radial-gradient(circle at 1px 1px, color-mix(in srgb,var(--line) 55%, transparent) 1px, transparent 0); background-size:20px 20px; }
+    #simGraph { display:block; width:100%; height:auto; min-height:430px; }
+    .sim-edge { stroke:var(--blue); stroke-width:2.5; fill:none; marker-end:url(#simArrow); transition:opacity .2s; }
+    .sim-edge.inferred { stroke:var(--amber); stroke-dasharray:7 5; }
+    .sim-edge.filtered { opacity:.12; }
+    .sim-edge.pending { opacity:.08; }
+    .sim-edge-label { fill:var(--muted); font:600 11px ui-monospace,monospace; text-anchor:middle; }
+    .sim-node { cursor:pointer; transition:opacity .2s; }
+    .sim-node.pending { opacity:.12; pointer-events:none; }
+    .sim-node.filtered { opacity:.18; }
+    .sim-node rect { fill:var(--surface); stroke:var(--blue); stroke-width:2; rx:8; }
+    .sim-node.inferred rect { stroke:var(--amber); stroke-dasharray:6 4; }
+    .sim-node.leverage rect { fill:var(--teal-soft); stroke:var(--teal); stroke-width:3; }
+    .sim-node.selected rect { filter:drop-shadow(0 4px 7px color-mix(in srgb,var(--navy) 26%, transparent)); stroke-width:4; }
+    .sim-node-title { fill:var(--ink); font:750 13px "Pretendard","Apple SD Gothic Neo",sans-serif; text-anchor:middle; }
+    .sim-node-score { fill:var(--muted); font:700 10px ui-monospace,monospace; text-anchor:middle; }
+    .sim-readout { display:grid; grid-template-columns:minmax(0,1fr) minmax(240px,.58fr); border-top:1px solid var(--line); }
+    .sim-readout > div { padding:17px 18px; }
+    .sim-readout > div + div { border-left:1px solid var(--line); }
+    .sim-readout h4 { margin:0 0 7px; font-size:14px; }
+    .sim-readout p { margin:0; color:var(--muted); font-size:12px; }
+    .sim-evidence { margin:0; padding-left:18px; color:var(--muted); font-size:12px; }
+    .sim-evidence li + li { margin-top:5px; }
+    .sim-disclaimer { margin-top:12px; padding:13px 15px; background:var(--amber-soft); color:var(--ink); border-radius:var(--r-sm); font-size:12px; }
+    .open-list details { background:var(--surface); border:1px solid var(--line); padding:0 18px; }
+    .open-list details + details { border-top:0; }
+    .open-list summary { cursor:pointer; padding:16px 0; font-weight:750; }
+    .open-list p { margin:0 0 18px; color:var(--muted); font-size:14px; }
+    .source-list { display:grid; grid-template-columns:repeat(2,1fr); gap:10px 26px; padding:0; list-style:none; counter-reset:source; }
+    .source-list li { counter-increment:source; display:grid; grid-template-columns:28px 1fr; gap:8px; font-size:13px; align-items:start; }
+    .source-list li::before { content:"[" counter(source) "]"; font:700 11px ui-monospace,monospace; color:var(--muted); padding-top:4px; }
+    .source-list b { display:block; }
+    .source-list a { word-break:break-all; }
+    footer { margin-top:70px; border-top:1px solid var(--line); padding:28px 0 46px; color:var(--muted); font-size:12px; }
+    .jump { position:fixed; right:16px; bottom:16px; width:42px; height:42px; border:1px solid var(--line); background:var(--surface); color:var(--ink); border-radius:50%; display:grid; place-items:center; text-decoration:none; box-shadow:var(--shadow); opacity:0; pointer-events:none; transition:opacity .2s; }
+    .jump.show { opacity:1; pointer-events:auto; }
+    @media (max-width: 820px) {
+      .wrap { width:min(100% - 26px, 680px); }
+      .masthead { padding-top:32px; background:var(--paper); }
+      .issue-line { align-items:flex-start; flex-direction:column; gap:5px; margin-bottom:22px; }
+      h1 { font-size:42px; }
+      .metrics { grid-template-columns:1fr 1fr; }
+      .metric { min-height:124px; }
+      nav { flex-wrap:wrap; overflow:visible; gap:4px 6px; }
+      nav a { padding:6px 9px; }
+      .section-head { grid-template-columns:1fr; gap:5px; }
+      .section-no { padding-top:0; }
+      .correction-grid, .split, .risk-grid, .source-list { grid-template-columns:1fr; }
+      .arch-shell { grid-template-columns:1fr; }
+      .stage-panel { position:static; order:-1; }
+      .track-grid, .deep-grid, .visibility, .io-grid, .case-grid, .education-grid { grid-template-columns:1fr; }
+      .sim-layout { grid-template-columns:1fr; }
+      .scenario-set { grid-template-columns:repeat(3,1fr); }
+      .graph-wrap, #simGraph { min-height:360px; }
+      .academy-band { grid-template-columns:1fr; }
+      .ops-flow, .training-run { grid-template-columns:1fr 1fr; }
+      .ops-step { min-height:0; }
+      .code-unit { grid-template-columns:1fr; }
+      .code-unit > div + div { border-left:0; border-top:1px solid var(--line); }
+      .evidence-strip { grid-template-columns:1fr 1fr; }
+      .deep-card.wide { grid-column:auto; }
+      .track-card { min-height:0; }
+      .signal { grid-template-columns:88px 1fr; }
+      .signal .confidence { grid-column:2; }
+      .technical-table, .technical-table tbody, .technical-table tr, .technical-table td { display:block; width:100%; }
+      .technical-table thead { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); }
+      .technical-table tr { border:1px solid var(--line); background:var(--surface); padding:10px; }
+      .technical-table tr + tr { border-top:0; }
+      .technical-table td { border:0; padding:4px 2px; }
+      .technical-table td::before { content:attr(data-label); display:block; color:var(--blue); font:700 10px ui-monospace,monospace; margin-bottom:2px; }
+      .metric-bar { grid-template-columns:92px 1fr 50px; }
+      .versus { grid-template-columns:1fr; }
+      .versus .vs { min-height:38px; }
+      .demix-flow { grid-template-columns:1fr; }
+      .cap-row { grid-template-columns:1fr; gap:7px; }
+      .timeline { grid-template-columns:1fr; }
+      .seizure { grid-template-columns:1fr 1fr; }
+      .seizure-step { min-height:130px; }
+    }
+    @media (max-width: 480px) {
+      h1 { font-size:36px; }
+      .metrics { grid-template-columns:1fr; }
+      .metric { min-height:0; }
+      .thesis { padding:16px; }
+      .stage { grid-template-columns:36px 1fr 18px; padding:15px 13px; }
+      .seizure { grid-template-columns:1fr; }
+      .seizure-step { min-height:0; }
+      .ops-flow, .training-run, .evidence-strip { grid-template-columns:1fr; }
+      .scenario-set, .sim-readout, .sim-levels { grid-template-columns:1fr; }
+      .sim-readout > div + div { border-left:0; border-top:1px solid var(--line); }
+      .sim-topline { flex-direction:column; }
+      .graph-wrap, #simGraph { min-height:310px; }
+      .training-step { min-height:0; }
+      section { padding-top:52px; }
+    }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior:auto; } .jump { transition:none; } }
+  </style>
+</head>
+<body>
+  <header class="masthead" id="top">
+    <div class="wrap">
+      <div class="issue-line"><span>TECHNICAL INTELLIGENCE BRIEF · 2026-09-27</span><span>공개자료 기반 · 확인/추론/미확인 분리</span></div>
+      <h1>국세청의 가상자산 추적은<br>하나의 “만능 추적기”가 아니다</h1>
+      <p class="dek">상용 KYT 라이선스, 국세청 내부 통합분석시스템, 거래소 자료, 그래프 분석과 강제징수 절차가 연결된 <strong>다층 증거 조립 시스템</strong>이다.</p>
+      <div class="thesis">
+        <span class="thesis-mark">!</span>
+        <div><strong>핵심 정정.</strong> “95% 실시간 감시”, “일 500만 건”, “분석가 50명”, “연 300억 원”, 특정 해외 4개사 동시 사용 주장은 공개 근거가 없다. 확인되는 것은 <strong>보난자팩토리 TranSight 약 1.465억 원 조달</strong>과 <strong>별도 약 30억 원 통합분석시스템</strong>이다.</div>
+      </div>
+      <div class="metrics" aria-label="핵심 수치">
+        <div class="metric"><b>1.465억</b><span>거래추적 SW 품목 단가</span><small>2026년 조달 · 약 1억4,650만원</small></div>
+        <div class="metric"><b>약 30억</b><span>통합분석시스템 구축 규모</span><small>별도 사업 · 2026년 말 완료 계획</small></div>
+        <div class="metric"><b>연 80억 건</b><span>AI 분석 대상 거래명세서 규모</span><small>언론 보도 기준</small></div>
+        <div class="metric"><b>1,461억</b><span>2021–2024 강제징수액</span><small>14,140명 · 의원실 자료 보도</small></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="nav-shell">
+    <nav class="wrap" aria-label="보고서 목차">
+      <a href="#corrections">팩트체크</a><a href="#architecture">아키텍처</a><a href="#procurement">사업 구분</a><a href="#tech">추적 기술</a><a href="#algorithms">알고리즘</a><a href="#vendor-stack">업체 프레임워크</a><a href="#academy">교육 커리큘럼</a><a href="#runbook">함수·워크플로우</a><a href="#simulator">추적 시뮬레이터</a><a href="#cases">해외 사례</a><a href="#privacy">프라이버시 체인</a><a href="#capability">수행능력</a><a href="#limits">한계</a><a href="#carf">CARF</a><a href="#seizure">강제징수</a><a href="#unknowns">미확인</a><a href="#sources">출처</a>
+    </nav>
+  </div>
+
+  <main>
+    <section id="corrections"><div class="wrap">
+      <div class="section-head"><div class="section-no">01 / FACT CHECK</div><div><h2>먼저, 창작 수치를 걷어낸다</h2><p>공개 조달·보도·국회 자료에서 확인되는 범위만 남겼다. 성능 수치가 공개되지 않은 기능은 기능 주장과 실효성을 분리했다.</p><div class="legend"><span class="tag verified">검증</span><span class="tag inferred">업계 표준 기반 추론</span><span class="tag unknown">미확인</span><span class="tag false">근거 없음</span></div></div></div>
+      <div class="correction-grid">
+        <article class="correction"><span class="tag false">근거 없음</span><div class="from">Chainalysis·Elliptic·TRM Labs·CipherTrace 동시 사용</div><span class="to">확인된 공급자: 보난자팩토리</span><p>2026년 5월 사업자 선정 보도. 별도 통합분석시스템 핵심 파트너로는 SKAI가 보도됐다. 해외 4개사 조합은 확인되지 않는다. <a class="source-link" href="https://v.daum.net/v/20260618180506824" target="_blank" rel="noopener">근거 보기</a></p></article>
+        <article class="correction"><span class="tag false">근거 없음</span><div class="from">95% 이상 실시간 모니터링</div><span class="to">공개된 탐지율·재현율 없음</span><p>TranSight는 실시간 지갑 위험 분석·믹서 역추적 기능을 주장하지만, 정량 성공률과 오탐률은 공개되지 않았다.</p></article>
+        <article class="correction"><span class="tag false">근거 없음</span><div class="from">일일 500만 건 처리</div><span class="to">연간 약 80억 건 분석 구상</span><p>이는 상용 SW 성능이 아니라 통합분석시스템이 다룰 거래명세서의 연간 규모다. <a class="source-link" href="https://www.mk.co.kr/news/economy/11970240" target="_blank" rel="noopener">근거 보기</a></p></article>
+        <article class="correction"><span class="tag false">근거 없음</span><div class="from">분석가 50명 · 연 예산 300억 원</div><span class="to">약 1.465억 + 별도 약 30억</span><p>공개 조달에서 확인되는 두 사업의 규모다. 인력 50명·연간 300억 원은 근거를 찾지 못했다. <a class="source-link" href="https://dima-g2b.com/list/R26BK01455053" target="_blank" rel="noopener">조달 공고</a></p></article>
+      </div>
+    </div></section>
+
+    <section id="architecture"><div class="wrap">
+      <div class="section-head"><div class="section-no">02 / SYSTEM MAP</div><div><h2>공개정보로 재구성한 6계층 아키텍처</h2><p>버튼을 눌러 각 계층의 역할과 증거 수준을 확인할 수 있다. 아래 구조는 공개된 4대 기능과 업계 표준을 결합한 재구성이며, 국세청 내부 설계도 원문은 아니다.</p></div></div>
+      <div class="arch-shell">
+        <div class="pipeline" role="tablist" aria-label="아키텍처 계층">
+          <button class="stage" role="tab" aria-selected="true" data-stage="0"><span class="stage-num">L1</span><span><strong>자료 수집</strong><small>VASP 거래명세서 · 온체인 데이터 · KYT · 공개정보</small></span><span class="arrow">→</span></button>
+          <button class="stage" role="tab" aria-selected="false" data-stage="1"><span class="stage-num">L2</span><span><strong>정규화·주소 해석</strong><small>체인별 스키마 통일 · 이벤트/브릿지 디코딩</small></span><span class="arrow">→</span></button>
+          <button class="stage" role="tab" aria-selected="false" data-stage="2"><span class="stage-num">L3</span><span><strong>엔티티·증거 그래프</strong><small>주소 클러스터 · 납세자 · 거래소 계정 · 관계 연결</small></span><span class="arrow">→</span></button>
+          <button class="stage" role="tab" aria-selected="false" data-stage="3"><span class="stage-num">L4</span><span><strong>탐지·위험 점수</strong><small>규칙·통계·ML · GNN 계획 · 이상패턴</small></span><span class="arrow">→</span></button>
+          <button class="stage" role="tab" aria-selected="false" data-stage="4"><span class="stage-num">L5</span><span><strong>사례 분석·시각화</strong><small>자금 흐름 · 자산 증감 · 믹서/DeFi 패턴</small></span><span class="arrow">→</span></button>
+          <button class="stage" role="tab" aria-selected="false" data-stage="5"><span class="stage-num">L6</span><span><strong>과세·징수·증거화</strong><small>소명 요청 · 거래소 채권 압류 · 매각 충당</small></span><span class="arrow">✓</span></button>
+        </div>
+        <aside class="stage-panel" id="stagePanel" aria-live="polite">
+          <div class="kicker">SELECTED LAYER · L1</div>
+          <h3>자료 수집</h3>
+          <p>국내 VASP가 제출하는 거래명세서와 블록체인 거래정보를 통합 관리하는 것이 공개된 핵심 기능이다.</p>
+          <ul><li>거래명세서 + 온체인 흐름</li><li>TranSight의 지갑·위험 신호 가능성</li><li>CARF 해외정보는 국가별 교환 시차 존재</li></ul>
+          <div class="truth-note"><b>증거 수준:</b> VASP·온체인 통합은 검증. 구체 커넥터와 실시간 주기는 비공개.</div>
+        </aside>
+      </div>
+    </div></section>
+
+    <section id="procurement"><div class="wrap">
+      <div class="section-head"><div class="section-no">03 / PROCUREMENT</div><div><h2>두 사업은 연결될 수 있지만, 같은 사업이 아니다</h2><p>상용 온체인 분석 도구의 도입과 국세청 내부 데이터 통합 플랫폼 구축을 구분해야 한다. 직접적인 기술 통합 여부는 공개되지 않았다.</p></div></div>
+      <div class="versus">
+        <article class="contract"><div class="amount">1.465억</div><h3>거래추적 SW 라이선스</h3><span class="tag verified">검증</span><ul><li>공고번호 R26BK01455053</li><li>보난자팩토리 선정, 2026년 7월 납품 보도</li><li>거래 흐름 시각화·클러스터링·믹서 역추적·비수탁 지갑 분석</li><li>역할: 상용 KYT/온체인 조사 도구</li></ul><p><a class="source-link" href="https://dima-g2b.com/list/R26BK01455053" target="_blank" rel="noopener">조달 근거</a> · <a class="source-link" href="https://v.daum.net/v/20260618180506824" target="_blank" rel="noopener">선정 보도</a></p></article>
+        <div class="vs">≠</div>
+        <article class="contract"><div class="amount">약 30억</div><h3>가상자산 통합분석시스템</h3><span class="tag verified">검증</span><ul><li>2026년 3월 사전규격, 12월 말 완료 계획</li><li>VASP 자료 + 블록체인 정보 통합</li><li>납세자별 자산 증감·잔고·거래현황</li><li>AI·ML·통계 기반 이상패턴 탐지</li><li>SKAI의 AgensGraph 기반 파트너십 보도</li></ul><p><a class="source-link" href="https://www.mk.co.kr/news/stock/11978457" target="_blank" rel="noopener">사업 근거</a> · <a class="source-link" href="https://v.daum.net/v/20260706140318646" target="_blank" rel="noopener">기술 파트너</a></p></article>
+      </div>
+      <div class="split" style="margin-top:18px">
+        <article class="panel"><h3>보난자팩토리 / TranSight</h3><p>국내 특화 지갑 검증·KYT 솔루션. 케이뱅크·업비트 관련 AML 공급과 신한은행 도입이 보도됐다.</p><dl><dt>공개 기능</dt><dd>지갑 위험 분석, 흐름 시각화, 클러스터링, 믹서 역추적</dd><dt>개발 방향</dt><dd>GNN 기반 거래 맵 분석, 동결 프로토콜 적용 계획</dd><dt>비공개</dt><dd>지원 체인 목록, 룰 가중치, 데이터 파이프라인, 성능 지표</dd></dl></article>
+        <article class="panel"><h3>SKAI / AgensGraph</h3><p>그래프와 관계형 모델을 결합한 하이브리드 DBMS를 기반으로 복잡한 거래관계를 표현한다는 보도.</p><dl><dt>공개 기능</dt><dd>스머핑·레이어링·믹서·DeFi 수법 탐지</dd><dt>분석 방식</dt><dd>5단계 이상 자금 흐름, GNN 결합 지갑 식별·관계 시각화</dd><dt>주의</dt><dd>국세청 실제 운영 스키마·쿼리·모델 정확도는 미공개</dd></dl></article>
+      </div>
+    </div></section>
+
+    <section id="tech"><div class="wrap">
+      <div class="section-head"><div class="section-no">04 / FORENSICS</div><div><h2>추적의 본질은 “주소→주체” 귀속과 확률적 연결</h2><p>블록체인은 흐름을 보여주지만 소유자 이름을 자동으로 보여주지 않는다. 체인별 휴리스틱과 거래소 KYC·법집행 자료·OSINT가 만나는 지점에서 실명 귀속이 강해진다.</p></div></div>
+      <div class="track-grid">
+        <article class="track-card"><div class="code">UTXO / BITCOIN</div><h3>입력 공동소유 + 잔돈 탐지</h3><ol><li>동일 거래의 여러 입력을 한 주체로 가정하는 CIOH</li><li>신규·비정형 액면·동일 스크립트 유형으로 change 후보 추정</li><li>후속 합류 패턴으로 클러스터 강화</li><li>CoinJoin 감지 시 휴리스틱 적용을 중단·완화</li></ol><p><span class="tag unknown">주의</span> naive 적용 오류율이 63%를 넘을 수 있다는 공개 사례가 있어 예외처리가 핵심이다. <a class="source-link" href="https://arxiv.org/abs/1107.4524" target="_blank" rel="noopener">기초 연구</a></p></article>
+        <article class="track-card"><div class="code">ACCOUNT / EVM</div><h3>호출 추적 + 이벤트 재구성</h3><ol><li>외부 거래, 내부 호출, ERC-20 Transfer 로그 결합</li><li>DEX swap·스마트컨트랙트·브릿지 이벤트 디코딩</li><li>fan-in/out, peeling, sweep 패턴 탐지</li><li>nonce·가스 대납자·공통 상대방으로 관계 보강</li></ol><p><span class="tag inferred">업계 표준</span> TranSight 고유 구현이 아니라 공개 포렌식 자료에 따른 기술 재구성이다.</p></article>
+        <article class="track-card"><div class="code">BRIDGE / CROSS-CHAIN</div><h3>양쪽 체인의 이벤트를 맞춘다</h3><ol><li>lock/mint 또는 burn/mint 이벤트 대응</li><li>브릿지 message·nonce 직접 연결</li><li>직접 참조가 없으면 시간·가치 상관분석</li><li>가스 지급자·수신주소 재사용·aggregator 이벤트로 보강</li></ol><p><span class="tag inferred">업계 표준</span> 공개 자료상 수수료 차감·시간창을 이용한 확률 매칭이 보편적이다.</p></article>
+      </div>
+      <div class="demix">
+        <h3>디믹싱은 암호를 “해독”하는 것이 아니다</h3>
+        <div class="demix-flow">
+          <div class="demix-step"><b>01 POOL</b>같은 고정 액면 풀의 입·출금 후보집합 생성</div>
+          <div class="demix-step"><b>02 TIME</b>입금–출금 시간근접·FIFO 유사성 평가</div>
+          <div class="demix-step"><b>03 VALUE</b>수수료 차감액·액면 조합·분할 패턴 비교</div>
+          <div class="demix-step"><b>04 FINGERPRINT</b>가스·릴레이어·출금 스케줄·주소 재사용 결합</div>
+          <div class="demix-step"><b>05 EXIT</b>출금 후 집금·거래소 유입 등 식별 지점 추적</div>
+        </div>
+        <p class="caveat"><b>결론:</b> 후보집합을 줄이고 확률 점수를 쌓는 과정이다. zk-SNARK의 예치–출금 암호학적 단절 자체를 깨는 것은 아니다. 2025년 연구는 3개 체인에서 23억 달러 이상 출금을 휴리스틱으로 연결했다고 주장하지만, 확정 귀속이나 암호학적 증명은 아니다. <a href="https://arxiv.org/pdf/2510.09433v1" target="_blank" rel="noopener">연구 보기</a></p>
+      </div>
+    </div></section>
+
+    <section id="algorithms"><div class="wrap">
+      <div class="section-head"><div class="section-no">05 / ALGORITHMS</div><div><h2>알고리즘 안쪽: 규칙 하나가 아니라 증거의 합성</h2><p>상용 제품의 내부 산식은 비공개다. 아래는 학술 논문·공개 구현에서 검증된 신호와, 그 신호를 운영 시스템이 결합하는 일반 구조를 분리해 해부한 것이다.</p></div></div>
+      <div class="deep-grid">
+        <article class="deep-card">
+          <span class="tag verified">검증된 원리</span><h3>UTXO 클러스터: union-find + 예외 게이트</h3>
+          <div class="formula">for tx in blocks:<br>if not CoinJoin(tx): union(all input addresses)<br>change = argmax P(output is change | features)<br>add_edge(cluster, change, confidence, provenance)</div>
+          <ol><li><b>CIOH:</b> 같은 거래의 입력 주소를 공동 통제자로 가정하고 서로소 집합을 합친다.</li><li><b>잔돈 후보:</b> 신규 주소, 입력과 같은 스크립트 타입, 비정형 금액, 출력 위치, locktime·RBF 변화 등을 점수화한다.</li><li><b>예외 게이트:</b> CoinJoin·PayJoin이면 하드 병합을 막고, 약한 관계는 출처·근거가 남는 후보 edge로 보존한다.</li><li><b>전이 확장:</b> 겹치는 입력집합과 후속 peel chain으로 엔티티 범위를 넓힌다.</li></ol>
+          <p>시뮬레이션 연구의 평균 오류율은 multi-input 단독 63.46%, one-time change 단독 92.66%, 결합 57.47%였다. 이는 상용 시스템 정밀도가 아니라 <b>시뮬레이션·오류 정의에 종속된 경고값</b>이다. <a class="source-link" href="http://arxiv.org/pdf/1706.00916v2" target="_blank" rel="noopener">클러스터링</a> · <a class="source-link" href="https://inria.hal.science/hal-05315736/file/526450_1_En_11_Chapter.pdf" target="_blank" rel="noopener">오류 연구</a></p>
+        </article>
+        <article class="deep-card">
+          <span class="tag verified">검증된 지문</span><h3>CoinJoin 감지: “동일 출력”만 보면 놓친다</h3>
+          <div class="signal-stack">
+            <div class="signal"><code>Whirlpool</code><span>5-input / 5-output, 동일 금액 출력, 당시 0.01·0.05·0.5 BTC 풀 주변값</span><span class="confidence">STRUCTURAL</span></div>
+            <div class="signal"><code>Wasabi 1.x</code><span>초기 coordinator fee 주소 + 3개 이상 동일 출력; 후기에는 10개 이상·최빈값·입력/잔돈 조건 결합</span><span class="confidence">COMPOSITE</span></div>
+            <div class="signal"><code>WabiSabi</code><span>임의 액면 때문에 equal-output 단독 규칙이 약해져 참가자 수·출력군·스크립트·수수료 구조 결합</span><span class="confidence">INFERRED</span></div>
+          </div>
+          <p>탐지의 목적은 CoinJoin 참가자를 곧바로 같은 소유자로 묶는 것이 아니라, 오히려 <b>잘못된 병합을 차단</b>하는 데 있다. GraphSense도 2026년 4월 UTXO용 CoinJoin/change 휴리스틱을 추가했다. <a class="source-link" href="https://arxiv.org/pdf/2109.10229" target="_blank" rel="noopener">지문 연구</a> · <a class="source-link" href="https://github.com/graphsense/graphsense.github.io/blob/HEAD/news.md" target="_blank" rel="noopener">GraphSense</a></p>
+        </article>
+        <article class="deep-card wide">
+          <span class="tag verified">학술 수치 · 철회 표시 주의</span><h3>Tornado Cash 디믹싱: H1 → H2 → H3의 신뢰도 사다리</h3>
+          <table class="technical-table">
+            <thead><tr><th>휴리스틱</th><th>관측 신호</th><th>판정 방식</th><th>증거 강도</th></tr></thead>
+            <tbody>
+              <tr><td data-label="휴리스틱">H1 주소 재사용</td><td data-label="관측 신호">입금 주소가 출금 주소로 재등장</td><td data-label="판정 방식">정확 주소 일치</td><td data-label="증거 강도">세 휴리스틱 중 가장 직접적</td></tr>
+              <tr><td data-label="휴리스틱">H2 거래 연결</td><td data-label="관측 신호">입금측–출금측 사이 native/USDT/WETH 직접 전송</td><td data-label="판정 방식">동일 규모 랜덤 주소집합 150회와 비교해 null 분포 검정</td><td data-label="증거 강도">행동 관계 증거</td></tr>
+              <tr><td data-label="휴리스틱">H3 FIFO</td><td data-label="관측 신호">남은 입금을 바로 다음의 가장 이른 출금과 대응</td><td data-label="판정 방식">빠른 출금 가정</td><td data-label="증거 강도">저신뢰·추론적</td></tr>
+            </tbody>
+          </table>
+          <div class="metric-bars" aria-label="Tornado Cash 연구의 체인별 전체 매칭률">
+            <div class="metric-bar"><span>Ethereum</span><span class="bar-track"><span class="bar-fill" style="display:block;width:34.7%"></span></span><b>34.7%</b></div>
+            <div class="metric-bar"><span>Polygon</span><span class="bar-track"><span class="bar-fill" style="display:block;width:34.7%"></span></span><b>34.7%</b></div>
+            <div class="metric-bar"><span>BSC</span><span class="bar-track"><span class="bar-fill" style="display:block;width:21.1%"></span></span><b>21.1%</b></div>
+          </div>
+          <p>논문은 H1+H2로 출금의 5.1–12.6%, FIFO 추가로 15–22 percentage points를 더 연결했다고 보고했다. 0.1 ETH 풀의 FIFO 매칭은 11,474건(49%), 세 휴리스틱 합산은 60%를 넘었다. 그러나 arXiv 2510.09433은 새 버전에 <b>철회 표시</b>가 있어, 이 수치는 확정 성능이나 법적 귀속이 아니라 연구 결과로만 읽어야 한다. <a class="source-link" href="https://arxiv.org/abs/2510.09433v1" target="_blank" rel="noopener">버전 상태</a> · <a class="source-link" href="https://arxiv.org/pdf/2510.09433v2" target="_blank" rel="noopener">방법론</a></p>
+        </article>
+        <article class="deep-card">
+          <span class="tag verified">EVM 구조</span><h3>표면 거래보다 call trace가 본체다</h3>
+          <div class="formula">CREATE: keccak256(RLP([sender, nonce]))[12:]<br>CREATE2: keccak256(0xff ++ deployer ++ salt ++ keccak256(init_code))[12:]</div>
+          <ul><li>내부 ETH 이동, delegatecall, ERC-20 Transfer 로그를 call tree로 복원한다.</li><li>같은 deployer/factory가 만든 컨트랙트 군을 파생주소 수식으로 묶는다.</li><li>Approval/ApprovalForAll은 owner→spender 권한 그래프를 만들고, 실제 인출 전 위험 연결을 보여준다.</li><li>nonce gap은 pending·replaced·dropped 거래가 섞일 수 있어 다른 주소의 동일 소유권 증명이 아니다.</li><li>gas limit·EIP-1559 fee·반올림 습관은 지갑/봇의 행동 지문이지 단독 귀속 근거가 아니다.</li></ul>
+          <p><a class="source-link" href="https://github.com/foundry-rs/book/blob/HEAD/src/pages/guides/deterministic-deployments-using-create2.mdx" target="_blank" rel="noopener">CREATE/CREATE2</a> · <a class="source-link" href="https://arxiv.org/pdf/2201.06811" target="_blank" rel="noopener">가스 지문</a></p>
+        </article>
+        <article class="deep-card">
+          <span class="tag verified">데이터셋 기준</span><h3>GNN: 그래프 문맥을 점수로 바꾸는 층</h3>
+          <p>Elliptic 데이터셋은 <b>노드=Bitcoin 거래, 엣지=자금 흐름</b>으로 두고 166개 특성(로컬 94 + 1-hop 집계 72)을 사용한다. 불법 라벨은 약 2%라 accuracy보다 AUPRC·precision/recall·시간 분할이 중요하다.</p>
+          <table class="technical-table"><thead><tr><th>모델</th><th>보고 F1</th><th>해석</th></tr></thead><tbody><tr><td data-label="모델">Logistic regression</td><td data-label="보고 F1">0.543</td><td data-label="해석">비그래프 기준선</td></tr><tr><td data-label="모델">Random Forest</td><td data-label="보고 F1">약 0.788–0.796</td><td data-label="해석">강한 tabular 기준선</td></tr><tr><td data-label="모델">GCN</td><td data-label="보고 F1">0.628</td><td data-label="해석">기초 그래프 합성곱</td></tr><tr><td data-label="모델">TFGAT + pseudo-label</td><td data-label="보고 F1">0.9046</td><td data-label="해석">precision 0.9814 / recall 0.8390</td></tr></tbody></table>
+          <p>연구마다 데이터셋·split이 달라 단순 순위화할 수 없다. 상용 KYT의 실제 가중치와 임계값도 비공개다. <a class="source-link" href="http://arxiv.org/abs/1908.02591" target="_blank" rel="noopener">Elliptic</a> · <a class="source-link" href="https://www.nature.com/articles/s41598-025-08365-9?error=cookies_not_supported&amp;code=50c3fb3f-a68c-4fff-a1ab-caaf612fa29c" target="_blank" rel="noopener">후속 연구</a></p>
+        </article>
+        <article class="deep-card wide">
+          <span class="tag inferred">일반 KYT 아키텍처</span><h3>실시간 판정 경로와 재현 가능한 증거 경로를 분리한다</h3>
+          <div class="signal-stack">
+            <div class="signal"><code>INGEST</code><span>full/archive node·RPC → block/log/trace·mempool 수집</span><span class="confidence">RAW</span></div>
+            <div class="signal"><code>NORMALIZE</code><span>canonical ETL → reorg 대응 idempotent upsert → 공통 체인 스키마</span><span class="confidence">REPLAYABLE</span></div>
+            <div class="signal"><code>ENRICH</code><span>graph store + 서비스 라벨 + 주소 클러스터 + 브릿지 이벤트</span><span class="confidence">PROVENANCE</span></div>
+            <div class="signal"><code>SCORE</code><span>룰 + 지도학습 + 이상탐지, direct/indirect exposure와 금액·방향 결합</span><span class="confidence">PROBABILISTIC</span></div>
+            <div class="signal"><code>CASE</code><span>알림 → 조사자 검토 → 제3자 식별 → 법적 절차 → KYC 귀속</span><span class="confidence">HUMAN-IN-LOOP</span></div>
+          </div>
+          <p>설계상 mempool 경보는 초 단위, 블록 확정 보강은 수초~수분, 과거 ETL은 체인 처리량 이상의 지속 처리와 reorg 재실행성이 필요하다고 추론할 수 있다. 하지만 국세청 시스템의 실제 지연 목표·처리량·보존정책은 공개되지 않았다. <a class="source-link" href="https://www.enterprisetimes.co.uk/2019/08/27/chainalysis-launches-suspicious-transaction-alert-tool/" target="_blank" rel="noopener">알림 구조</a> · <a class="source-link" href="https://cdn.prod.website-files.com/6082dc5b670562507b3587b4/698a5391bf77755a3a3e924b_TRM%20-%20Blockchain%20Investigator%27s%20Flip%20Book%20-%20US.pdf" target="_blank" rel="noopener">조사 절차</a></p>
+        </article>
+      </div>
+    </div></section>
+
+    <section id="vendor-stack"><div class="wrap">
+      <div class="section-head"><div class="section-no">05A / VENDOR STACK</div><div><h2>상용 업체의 실제 제품 경계를 따라 다시 그린다</h2><p>KYT는 입출금 시점의 경보, Investigator는 경보 이후의 그래프 확장이다. 두 화면은 별개여도 같은 attribution·클러스터·위험 로직을 공유한다. 공개 문서가 밝힌 기능만 비교하고 내부 가중치는 비워뒀다.</p></div></div>
+      <div class="ops-flow" aria-label="상용 추적 시스템 공통 파이프라인">
+        <article class="ops-step"><b>노드·RPC 수집</b><p>블록·거래·로그·trace를 raw 영역에 적재한다. GraphSense 공개 구현은 Cassandra의 <code>{NETWORK}_raw</code>에 block, transaction, exchange_rates를 둔다.</p></article>
+        <article class="ops-step"><b>체인별 그래프</b><p>UTXO는 transaction/address graph, account 체인은 token transfer·call graph로 변환한다. Spark가 address graph와 역정규화 view를 계산한다.</p></article>
+        <article class="ops-step"><b>클러스터·귀속</b><p>co-spend union-find와 CoinJoin 제외가 공개 구현에서 확인된다. 상용사의 전체 휴리스틱 목록은 비공개다.</p></article>
+        <article class="ops-step"><b>Exposure·행위 탐지</b><p>direct/indirect exposure, 방향·금액·제재목록과 peeling, layering, change of custody 같은 패턴을 결합한다.</p></article>
+        <article class="ops-step"><b>KYT 경보</b><p>룰·임계값에 따라 큐를 만들고 지속 재평가한다. Chainalysis는 온체인 발생 후 수 초 이내 경보를 공식 설명한다.</p></article>
+        <article class="ops-step"><b>Investigator 확장</b><p>전후방 흐름, 미표시 연결, multi-route path, swap·bridge를 조사 그래프에서 펼친다.</p></article>
+        <article class="ops-step"><b>Leverage point</b><p>VASP·custodian처럼 주소 통제자 정보를 가진 제3자를 식별한다. TRM 법집행 가이드의 공식 용어다.</p></article>
+        <article class="ops-step"><b>법적 절차</b><p>소환장·영장·MLAT·동결 요청으로 KYC, IP, 계정 자료를 확보한다. 온체인 그래프만으로 실명을 확정하지 않는다.</p></article>
+        <article class="ops-step"><b>오프체인 교차검증</b><p>서버·장치·결제기록·관리자 증거와 대조해 귀속을 강화하거나 반증한다.</p></article>
+        <article class="ops-step"><b>증거 export</b><p>그래프·timestamp·label·출처·감사로그를 재현 가능한 보고서로 고정한다.</p></article>
+      </div>
+
+      <div class="io-grid">
+        <article class="io-card"><span class="tag verified">Chainalysis · 공개 1차</span><h3>KYT → Reactor</h3>
+          <div class="io-line"><b>INGEST</b><span>대규모 transaction data, 400+ networks·50M+ tokens(KYT FAQ)</span></div>
+          <div class="io-line"><b>GROUP</b><span>수백 개 clustering heuristics. 구체 목록은 비공개</span></div>
+          <div class="io-line"><b>EXPOSURE</b><span>고정 N-hop이 아니라 식별된 서비스에 닿을 때까지 역추적</span></div>
+          <div class="io-line"><b>ALERT</b><span>온체인 발생 후 수 초 이내; behavioral·direct·indirect 룰과 사용자 임계값</span></div>
+          <div class="io-line"><b>ESCALATE</b><span>risk score·entity·context를 Reactor로 넘겨 최초 입금부터 최종 cash-out까지 조사</span></div>
+          <p><a class="source-link" href="https://www.chainalysis.com/product/kyt/" target="_blank" rel="noopener">KYT 공식</a> · <a class="source-link" href="https://www.chainalysis.com/product/reactor/" target="_blank" rel="noopener">Reactor 공식</a></p>
+        </article>
+        <article class="io-card"><span class="tag verified">TRM Labs · 공개 1차</span><h3>Wallet Screening → Forensics</h3>
+          <div class="io-line"><b>SCREEN</b><span>ownership risk + counterparty risk, sanctions·ransomware·stolen funds 등 범주</span></div>
+          <div class="io-line"><b>DETECT</b><span>Signatures®가 peeling chains, layering, potential change of custody를 표면화</span></div>
+          <div class="io-line"><b>TRACE</b><span>미표시 flow, automatic cross-chain, multi-route pathfinding</span></div>
+          <div class="io-line"><b>ATTRIBUTE</b><span>모든 귀속에 source + confidence score를 보여주는 glass-box 방식</span></div>
+          <div class="io-line"><b>PROVE</b><span>parallel reconstruction, case graph·note·export로 법정 재현성 보강</span></div>
+          <p><a class="source-link" href="http://www.trmlabs.com/blockchain-intelligence-platform/forensics" target="_blank" rel="noopener">Forensics 공식</a> · <a class="source-link" href="https://www.trmlabs.com/guides/the-blockchain-investigators-flip-book-a-guide-for-law-enforcement" target="_blank" rel="noopener">Flip Book</a></p>
+        </article>
+        <article class="io-card"><span class="tag verified">Elliptic · 공개 1차</span><h3>Lens·Navigator → Investigator</h3>
+          <div class="io-line"><b>SHARED</b><span>screening·monitoring·investigation이 동일 저지연 pipeline·dataset·configurable risk logic 공유</span></div>
+          <div class="io-line"><b>PRE-TX</b><span>Lens가 wallet risk profile과 사용자 임계값·지속 모니터링 제공</span></div>
+          <div class="io-line"><b>MONITOR</b><span>Navigator가 inbound/outbound transaction을 사용자 위험 파라미터로 flag</span></div>
+          <div class="io-line"><b>TRACE</b><span>Investigator가 wallet/transaction을 fund-flow graph로 변환하고 cross-chain·bridge를 원클릭 추적</span></div>
+          <div class="io-line"><b>BOUNDARY</b><span>166-feature 연구 데이터셋과 production score의 직접 매핑은 공개되지 않음</span></div>
+          <p><a class="source-link" href="https://www.elliptic.co/products/" target="_blank" rel="noopener">플랫폼 공식</a> · <a class="source-link" href="https://www.elliptic.co/products/investigator/" target="_blank" rel="noopener">Investigator</a></p>
+        </article>
+        <article class="io-card"><span class="tag verified">GraphSense · 공개 구현</span><h3>raw → Spark → REST</h3>
+          <div class="io-line"><b>INGEST</b><span><code>graphsense-cli ingest from-node -e dev -c {NETWORK}</code></span></div>
+          <div class="io-line"><b>TRANSFORM</b><span>Spark가 address graph·de-normalized view를 계산해 transformed keyspace에 저장</span></div>
+          <div class="io-line"><b>CLUSTER</b><span>Rust union-find; cluster ID는 min(address_id); CoinJoin co-spend 제외</span></div>
+          <div class="io-line"><b>SERVE</b><span>REST API와 dashboard에 address·cluster·neighbor·transaction·tag view 제공</span></div>
+          <div class="io-line"><b>STATUS</b><span>기존 graphsense-spark repo는 archive, 현행 파이프라인은 graphsense-lib monorepo의 spark/로 이동</span></div>
+          <p><a class="source-link" href="https://github.com/graphsense/graphsense-spark/blob/HEAD/README.md" target="_blank" rel="noopener">파이프라인</a> · <a class="source-link" href="https://github.com/graphsense/graphsense-lib/releases/tag/v2.15.0" target="_blank" rel="noopener">v2.15.0</a></p>
+        </article>
+      </div>
+
+      <table class="technical-table vendor-table">
+        <thead><tr><th>업체</th><th>공개된 추적 핵심</th><th>조사·증거화</th><th>비공개 경계</th></tr></thead>
+        <tbody>
+          <tr><td data-label="업체">Chainalysis</td><td data-label="공개 추적">수백 clustering heuristics, 가변 깊이 indirect exposure, behavioral alert</td><td data-label="조사·증거화">KYT 경보를 Reactor로 넘기고 27+ chains·40M+ assets, 134K+ counterparties를 추적</td><td data-label="비공개">exact heuristics, score weights, KYT enterprise API schema</td></tr>
+          <tr><td data-label="업체">TRM Labs</td><td data-label="공개 추적">Signatures®, 미표시 flow, multi-route·cross-chain tracing</td><td data-label="조사·증거화">attribution source/confidence, parallel reconstruction, A–D 법적 절차</td><td data-label="비공개">pattern model, weights, enterprise risk endpoints</td></tr>
+          <tr><td data-label="업체">Elliptic</td><td data-label="공개 추적">동일 data/risk logic 기반 screening·monitoring·investigation</td><td data-label="조사·증거화">자동 fund-flow graph, one-click cross-chain, 법원용 export</td><td data-label="비공개">166 features↔production score mapping, API schema</td></tr>
+          <tr><td data-label="업체">Scorechain</td><td data-label="공개 추적">type·country·behaviour indicator, 0–100 score·category breakdown</td><td data-label="조사·증거화">red flag와 audit trail</td><td data-label="비공개">공식 OpenAPI 미열람, 제3자 endpoint 미사용</td></tr>
+          <tr><td data-label="업체">Merkle Science</td><td data-label="공개 추적">custom rule·predictive behavioral analytics</td><td data-label="조사·증거화">continuous monitoring·case-management workflow</td><td data-label="비공개">Tracker 공식 자료 미확보</td></tr>
+          <tr><td data-label="업체">TranSight</td><td data-label="공개 추적">실시간 지갑 위험도, 흐름 시각화·클러스터링·믹서 역추적·비수탁 지갑 분석(2차 보도)</td><td data-label="조사·증거화">AML/FDS 연동, 최종 유입 거래소·증거화 지원 보도</td><td data-label="비공개">회사 1차 문서, 룰셋·정확도·API·지원 체인; TranSafer 제품명도 미확인</td></tr>
+        </tbody>
+      </table>
+    </div></section>
+
+    <section id="academy"><div class="wrap">
+      <div class="section-head"><div class="section-no">05B / VENDOR ACADEMIES</div><div><h2>교육 커리큘럼은 제품 마케팅보다 더 구체적인 “운영 설명서”다</h2><p>유료 교재나 시험 문항이 아니라 업체가 공개한 과정 목차·학습목표·현장 가이드만 대조했다. 그 결과 주소 입력부터 그래프 확장, 익스포저 판단, 실체 식별, 사법 절차, 케이스 기록까지의 공통 루프가 확인된다.</p><div class="legend"><span class="tag verified">공개 커리큘럼 확인</span><span class="tag inferred">제품 기능에서 해석</span><span class="tag unknown">유료 과정 내부는 미확인</span></div></div></div>
+
+      <div class="academy-band" aria-label="업체 교육 프로그램 공개 규모">
+        <div class="academy-stat"><b>41,000+ · 1,500+</b><span>Chainalysis 인증 취득자 · 참여 기관/정부. 2026 CDAP 개편 발표 기준. <a href="https://www.chainalysis.com/blog/new-chainalysis-academy-2026/" target="_blank" rel="noopener">공식 발표</a></span></div>
+        <div class="academy-stat"><b>75h+ · 13,000+</b><span>TRM Academy 영상 · 발급 인증. 교육자료는 1,500쪽 이상. <a href="https://www.trmlabs.com/training-and-certifications" target="_blank" rel="noopener">공식 과정</a></span></div>
+        <div class="academy-stat"><b>18h+ · 3,528</b><span>Merkle Science Institute 영상 · 발급 인증. 교육자료는 1,500쪽 이상. <a href="https://www.merklescience.com/training-certifications" target="_blank" rel="noopener">공식 과정</a></span></div>
+      </div>
+
+      <div class="education-grid">
+        <article class="academy-card"><span class="tag verified">Chainalysis · 가장 상세</span><h3>Reactor 커리큘럼이 밝힌 분석 순서</h3><p>2026년 1월 21일 Academy는 CDAP로 개편됐다. CDAF가 기초 선행과정이고 CCI가 구 CRC·CEIC, CCAI가 구 CISC를 대체한다. CCEI는 최고 단계 캡스톤, CASC는 자산압수 전문과정으로 유지된다. <a class="source-link" href="https://www.chainalysis.com/academy-launch/" target="_blank" rel="noopener">매핑표</a></p>
+          <div class="module-list">
+            <div class="module-row"><b>CRC CORE</b><span>Bitcoin 거래 → Reactor 기본 → 그래프 구축 → <strong>입금주소 분리</strong> → 트랜잭션 분석·클러스터 병합 → 관심거래 식별 → <strong>필체인 분석</strong> → 식별 전략 → 믹서 식별</span></div>
+            <div class="module-row"><b>CISC ADV.</b><span>DEX → 주소·거래 기능 분석 → 고급 지갑 동작·난독화 → 더스팅 → 체인 호핑 → 수탁·비수탁 지갑</span></div>
+            <div class="module-row"><b>REACTOR</b><span>식별자 검색 → 관련 실체·OSINT 스캔 → 거래상대방·익스포저 → Watch → 자동 패스파인딩 → 크로스체인 그래프</span></div>
+          </div>
+          <p>구 CRC 공개 시험 형식은 100문항·2.5시간·75%·오픈노트·유효 1년, 구 CISC는 80문항·4시간·75%·오픈노트이며 CRC와 3개월 이상 Reactor 경험이 전제였다. <b>신체계 CCI·CCAI 시험 스펙은 공개자료에서 확인되지 않는다.</b> <a class="source-link" href="https://www.scribd.com/document/632450170/Chainalysis-Reactor-Certification-Overview" target="_blank" rel="noopener">CRC 개요</a> · <a class="source-link" href="https://everpath-course-content.s3-accelerate.amazonaws.com/instructor%2Ftwiimd6dacphxj9igwlrlb1n%2Fpublic%2F1682635189%2FChainalysis-Investigation+Specialist-Certification-Overview-KR.pdf" target="_blank" rel="noopener">CISC 개요</a></p>
+        </article>
+
+        <article class="academy-card"><span class="tag verified">TRM · 현장 절차가 가장 공개적</span><h3>ACI 기술 주제 + Flip Book의 법집행 루프</h3><p>TRM Academy는 CFC·CI·ACI·CCS·DFC·CSS·Crypto Tax의 7개 인증과 Forensics Mastery, Solana·TRON·TON 조사과정 등을 공개한다. 과정은 온디맨드 영상·교재·강사 라이브챗·시험·디지털 배지로 구성된다. <a class="source-link" href="https://www.trmlabs.com/training-and-certifications" target="_blank" rel="noopener">과정 목록</a></p>
+          <div class="module-list">
+            <div class="module-row"><b>ACI</b><span>Wasabi·Tornado Cash 수동 디믹싱, derivation path, 컨트랙트 읽기·스푸핑 식별, signature 적용, hex 멀티시그 확인. <a href="https://dataexpert.eu/academy/trm-advanced-crypto-investigator" target="_blank" rel="noopener">공개 주제</a></span></div>
+            <div class="module-row"><b>TRON 01–13</b><span>토큰 유형·익스플로러·사기 패턴·트랜잭션·컨트랙트·주소 활성화·shielded·DeFi·브리지까지 13개 모듈. <a href="https://www.trmlabs.com/training-and-certifications/tracing-on-tron" target="_blank" rel="noopener">무료 과정</a></span></div>
+            <div class="module-row"><b>FLIP BOOK</b><span>주소·tx hash 입력 → 네트워크 매핑 → leverage point → VASP 식별 → KYC·이메일·IP·IMEI·전체 거래내역 요청 → 압수·몰수.</span></div>
+          </div>
+          <p>Leverage point 체크는 거래 수, 최근 거래시점, 보유 가치, 더 큰 주소망 소속 여부, risk attribution, 기록·자산을 보유한 제3자 exposure의 6문항이다. 문항 수·시간·합격선은 공개되지 않았다. <a class="source-link" href="https://cdn.prod.website-files.com/6082dc5b670562507b3587b4/698a5391bf77755a3a3e924b_TRM%20-%20Blockchain%20Investigator%27s%20Flip%20Book%20-%20US.pdf" target="_blank" rel="noopener">공식 Flip Book PDF</a></p>
+        </article>
+
+        <article class="academy-card"><span class="tag verified">Elliptic · 컴플라이언스 중심</span><h3>도구 교육보다 통제 설계가 앞선다</h3><p>Elliptic Learn은 AML 기초, Lens 지갑 스크리닝과 Navigator 거래 모니터링의 제품 인증, Specialist Investigator, FIU CONNECT를 제공한다고 공개한다. 다만 과정별 UI 절차와 시험 사양은 제한적으로만 공개돼 있다. <a class="source-link" href="https://www.elliptic.co/solutions/education-and-training" target="_blank" rel="noopener">공식 교육</a></p>
+          <div class="module-list">
+            <div class="module-row"><b>FIU 9 TOPICS</b><span>암호자산 기초, 프라이버시·익명성 강화, 블록체인 분석, 불법 티폴로지, 테러자금, 해킹, 규제, 제재, 신흥 발전.</span></div>
+            <div class="module-row"><b>CONTROL LOOP</b><span>Lens로 지갑 위험을 선별하고 Navigator로 거래 exposure를 모니터링한 뒤, 고위험 시 자금 목적·궁극적 출처/목적지에 대한 EDD를 수행. <a href="https://www.elliptic.co/hubfs/Typologies-2022-Preventing%20Financial%20Crime%20in%20Crypto-NH.pdf" target="_blank" rel="noopener">공식 Typologies PDF</a></span></div>
+            <div class="module-row"><b>ROLE SPLIT</b><span>1차 방어선은 리스크 인지·에스컬레이션, 2차 방어선은 정책·통제 설계에 초점을 둔다.</span></div>
+          </div>
+          <p>FIU CONNECT의 9개 평가 주제는 공개됐지만 문항 수·형식·합격선은 미공개다. Lens/Navigator 제품 인증과 Specialist Investigator의 상세 모듈도 확인되지 않는다. <a class="source-link" href="https://www.elliptic.co/newsroom/elliptic-manchestercf-launch-crypto-compliance-certification/" target="_blank" rel="noopener">FIU CONNECT</a></p>
+        </article>
+
+        <article class="academy-card"><span class="tag verified">Merkle Science · Scorechain</span><h3>방법론 가이드와 리스크 판단 교육</h3><p>Merkle Science Institute는 MiCAR Stablecoin Issuers, Crypto Compliance Advanced, Crypto Investigator의 3개 인증을 공개한다. Crypto Investigator는 여러 블록체인에서 자금을 추적하고 의심 활동을 실세계 실체와 연결하는 역량을 목표로 하지만 UI 단위 절차는 공개하지 않는다.</p>
+          <div class="module-list">
+            <div class="module-row"><b>UTXO</b><span>클러스터링과 transaction fingerprinting으로 소유 패턴을 좁힌다.</span></div>
+            <div class="module-row"><b>CROSS-CHAIN</b><span>스왑·브리지를 통한 이동을 추적하고, USDT·USDC·PYUSD의 컴플라이언스 환경을 분리해 다룬다.</span></div>
+            <div class="module-row"><b>SCORECHAIN</b><span>transaction analysis, wallet risk scoring, behavioral monitoring으로 스트럭처링·레이어링·급속 이동·프라이버시 코인 사용을 판단한다. <a href="https://www.scorechain.com/resources/crypto-glossary/aml-solutions-crypto" target="_blank" rel="noopener">공식 글로서리</a></span></div>
+          </div>
+          <p>Merkle의 공개 근거는 <a class="source-link" href="https://info.merklescience.com/investigations-guide-2025" target="_blank" rel="noopener">Investigations Guide 2025</a>다. Scorechain Academy는 컴플라이언스 책임자 대상 교육형 세미나이며 <b>인증·규제 승인·공식 자격을 부여하지 않는다고 명시</b>한다. <a class="source-link" href="https://scorechain.com/resources/scorechain-academy" target="_blank" rel="noopener">Scorechain Academy</a></p>
+        </article>
+      </div>
+
+      <div class="training-run" aria-label="교육 과정에서 재구성한 공통 실습 순서">
+        <article class="training-step"><b>Seed를 전자형태로 확보</b><p>주소·tx hash를 복사해 입력하고 체인·토큰·시간·피해 진술을 케이스 원본으로 고정한다.</p></article>
+        <article class="training-step"><b>그래프와 클러스터를 확장</b><p>입출금, related address, cluster merge, deposit address, peel chain을 방향·금액과 함께 검토한다.</p></article>
+        <article class="training-step"><b>난독화·크로스체인 분기</b><p>CoinJoin·믹서·DEX·bridge·chain hopping을 표시하고, 자동 연결과 수동 디믹싱을 구분한다.</p></article>
+        <article class="training-step"><b>Leverage point를 고른다</b><p>거래 수·최근성·잔액·attribution·제3자 exposure로 소환 가능한 VASP·custodian을 찾는다.</p></article>
+        <article class="training-step"><b>법적 귀속과 증거화</b><p>KYC·IP·기기·전체 거래내역으로 실체를 확인하고 그래프·노트·출처·confidence를 케이스에 보존한다.</p></article>
+      </div>
+
+      <table class="technical-table" style="margin-top:18px">
+        <thead><tr><th>교육 모듈</th><th>실무 산출물</th><th>함수·데이터 구조로 번역</th><th>판정 한계</th></tr></thead>
+        <tbody>
+          <tr><td data-label="교육 모듈">입금주소 분리</td><td data-label="실무 산출물">서비스 클러스터 안의 고객별 deposit address 후보</td><td data-label="함수·데이터">address → cluster → inbound tx → service attribution</td><td data-label="판정 한계">거래소 내부 계정주는 KYC·법적 요청 없이는 미확정</td></tr>
+          <tr><td data-label="교육 모듈">클러스터 병합</td><td data-label="실무 산출물">병합 근거와 예외가 붙은 entity 후보</td><td data-label="함수·데이터">union-find + CoinJoin gate + provenance edge</td><td data-label="판정 한계">공동입력은 휴리스틱이며 자연인 동일성 증명이 아님</td></tr>
+          <tr><td data-label="교육 모듈">필체인·pass-through</td><td data-label="실무 산출물">중간 주소를 통과한 우선 추적 경로</td><td data-label="함수·데이터">ordered tx path + amount/time continuity + zero-balance flag</td><td data-label="판정 한계">단순 시간·금액 유사성만으로는 소유권을 확정 못함</td></tr>
+          <tr><td data-label="교육 모듈">수동 디믹싱·chain hopping</td><td data-label="실무 산출물">후보 연결, 대안 가설, confidence가 있는 크로스체인 그래프</td><td data-label="함수·데이터">event/message key 우선, 없으면 time/value/relayer score</td><td data-label="판정 한계">후보 축소와 암호학적 연결 증명은 다른 결과</td></tr>
+          <tr><td data-label="교육 모듈">제3자 기록 요청</td><td data-label="실무 산출물">KYC·이메일·IP·기기·거래내역 묶음</td><td data-label="함수·데이터">service endpoint → legal process → identity evidence</td><td data-label="판정 한계">도구가 아닌 관할권·절차·자료보존 상태가 병목</td></tr>
+        </tbody>
+      </table>
+
+      <div class="panel" style="margin-top:14px"><span class="tag unknown">공개자료의 끝</span><h3 style="margin-top:12px">교육으로도 확인되지 않은 것</h3><p>상용사의 전체 클러스터링 휴리스틱, 위험점수 가중치, exposure 감쇠식, 제품별 enterprise API 스키마, 유료 과정의 모듈별 교재와 시험문항은 비공개다. “CCFR”이라는 Chainalysis 인증명도 공식 공개 자료에서 찾지 못했다. 공개된 구 명칭은 <b>CCFC</b>, TRM의 기초 인증은 <b>CFC</b>라서 명칭 혼동 가능성이 있다.</p></div>
+    </div></section>
+
+    <section id="runbook"><div class="wrap">
+      <div class="section-head"><div class="section-no">05C / FUNCTION RUNBOOK</div><div><h2>함수 수준으로 보면 “조회→확장→판정→증거화”다</h2><p>아래 함수명은 GraphSense 공개 Python client와 공개 Sanctions API에서 확인되는 것만 썼다. 상용 KYT 엔터프라이즈 endpoint는 로그인 게이트 뒤에 있어 만들지 않았다.</p></div></div>
+      <div class="codebook">
+        <article class="code-unit"><div><span class="tag verified">공개 함수</span><h3>1. 주소 상태·태그·클러스터 조회</h3><p>주소 하나를 seed로 거래량·귀속·클러스터 후보를 가져온다. API 응답은 결론이 아니라 다음 확장 경로다.</p></div><div><pre>gs = GraphSense(api_key=ENV["API_KEY"], currency="btc")
+seed = gs.lookup_address(
+  address,
+  with_tags=True,
+  with_cluster=True,
+  with_tag_summary=True
+)
+
+# REST client equivalents
+get_address(currency, address, include_actors=True)
+get_address_cluster(currency, address)
+get_tag_summary_by_address(currency, address)</pre></div></article>
+        <article class="code-unit"><div><span class="tag verified">공개 함수</span><h3>2. 이웃·거래·연관주소 확장</h3><p>한 번에 전체 그래프를 확정하지 않는다. pagination과 방향·금액·시간을 보존하며 hop을 늘리고, 각 edge에 근거를 남긴다.</p></div><div><pre>list_address_links(currency, address, ...)
+list_address_neighbors(currency, address, ...)
+list_address_txs(currency, address, ...)
+list_related_addresses(currency, address, ...)
+list_tags_by_address(currency, address, ...)
+list_cluster_addresses(currency, cluster, page, pagesize=10)
+
+# raw wrapper
+gs.raw.txs.list_address_txs("btc", address)</pre></div></article>
+        <article class="code-unit"><div><span class="tag inferred">공개 원리의 운영 의사코드</span><h3>3. 클러스터 병합과 예외 처리</h3><p>GraphSense v2.15.0의 공개 사실은 union-find, CoinJoin co-spend 제외, min(address_id) cluster ID다. 아래 제어 흐름은 그 사실을 설명하기 위한 의사코드다.</p></div><div><pre>for tx in chunk:
+  if detect_coinjoin(tx):
+    record_edges(tx.inputs, relation="co-spend", hard_merge=False)
+    continue
+  root = min(tx.input_address_ids)
+  union_find.union(root, *tx.input_address_ids)
+
+mapping = Clustering.get_mapping()
+store_multi_member_clusters(mapping)
+synthesize_singleton_at_read_time()</pre></div></article>
+        <article class="code-unit"><div><span class="tag verified">공개 원리</span><h3>4. Exposure를 계산할 때</h3><p>Chainalysis 공개 FAQ는 indirect exposure를 고정 hop으로 자르지 않고 식별 서비스까지 거슬러 간다고 명시한다. 분모·감쇠율·임계값은 비공개다.</p></div><div><pre>queue = [seed]
+while queue:
+  node = queue.pop()
+  if is_attributed_service(node):
+    emit_exposure(path, service=node, direction, amount)
+    continue
+  queue.extend(previous_funding_edges(node))
+
+# 비공개: path weighting, taint accounting,
+# confidence threshold, max resource budget</pre></div></article>
+        <article class="code-unit"><div><span class="tag inferred">제품 기능의 최소 계약</span><h3>5. 경보 객체와 조사 승격</h3><p>공개 자료상 alert는 위험 범주·서비스·direct/indirect·자금 방향·금액·등급을 가진다. 실제 enterprise schema는 확인할 수 없다.</p></div><div><pre>alert = {
+  "category": observed_category,
+  "service": attributed_counterparty,
+  "exposure": "direct" | "indirect",
+  "fund_direction": "incoming" | "outgoing",
+  "amount": observed_amount,
+  "severity": "Severe" | "High" | "Medium" | "Low",
+  "rule_version": current_rule_version,
+  "evidence_refs": immutable_edge_ids
+}
+if analyst_accepts(alert):
+  open_in_investigator(alert, preserve_context=True)</pre></div></article>
+        <article class="code-unit"><div><span class="tag verified">공개 API</span><h3>6. 제재주소 검사와 경계</h3><p>Chainalysis 무료 Sanctions API는 주소 식별만 제공한다. 이것을 KYT·Reactor API라고 부르면 안 된다. TRM 공개 문서는 Sanctions·Chainabuse만 공개한다.</p></div><div><pre>GET https://public.chainalysis.com/api/v1/address/{addressToCheck}
+X-API-Key: &lt;public-sanctions-api-key&gt;
+
+response.identifications[] = {
+  category, name, description, url
+}
+
+# KYT enterprise endpoints/schema: Could not verify
+# TRM enterprise screening endpoints/schema: Could not verify</pre></div></article>
+      </div>
+      <div class="evidence-strip" aria-label="증거 객체의 필수 항목">
+        <div><b>관측 원본</b><span>block height·tx hash·log index·trace path·수집 시각</span></div>
+        <div><b>변환 계보</b><span>parser·rule·model version과 재실행 가능한 입력</span></div>
+        <div><b>귀속 근거</b><span>source·confidence·최초 확인일·반증 가능성</span></div>
+        <div><b>검토 기록</b><span>분석가 판단·복수 툴/수동 검증·export hash</span></div>
+      </div>
+      <div class="panel" style="margin-top:14px"><span class="tag unknown">비공개 경계</span><h3 style="margin-top:12px">구체적으로 쓸 수 없는 함수</h3><p><code>score_wallet()</code>의 가중치, <code>cluster_address()</code>의 전체 휴리스틱, confidence cut-off, exposure 감쇠·전파 반경, Chainalysis·TRM·Elliptic enterprise API 경로는 공개자료로 검증되지 않았다. 따라서 구현부를 “그럴듯한 endpoint”로 채우지 않고 인터페이스 수준에서 멈춘다.</p></div>
+      <p style="margin-top:14px"><a class="source-link" href="https://github.com/graphsense/graphsense-lib/blob/HEAD/clients/python/docs/AddressesApi.md" target="_blank" rel="noopener">AddressesApi</a> · <a class="source-link" href="https://github.com/graphsense/graphsense-lib/blob/HEAD/clients/python/docs/ClustersApi.md" target="_blank" rel="noopener">ClustersApi</a> · <a class="source-link" href="https://github.com/graphsense/graphsense-lib/blob/HEAD/clients/python/README_EXT.md" target="_blank" rel="noopener">Python client</a> · <a class="source-link" href="https://docs.trmlabs.com/" target="_blank" rel="noopener">TRM 공개 API</a></p>
+    </div></section>
+
+
+    <section id="simulator" class="simulator" data-level="1"><div class="wrap">
+      <div class="section-head"><div class="section-no">05D / TRACE SIMULATOR</div><div><h2>기본에서 수사관 모드까지, 같은 그래프를 확장한다</h2><p>레벨 1의 안내형 투어 위에 레벨 2의 직접 조작, 레벨 3의 디믹싱·크로스체인·exposure·증거 export 기능이 누적된다. 모든 주소·점수·거래는 학습용 합성 데이터다.</p></div></div>
+      <div class="sim-levels" role="group" aria-label="체험 수준 선택">
+        <button class="level-btn" data-level="1" aria-pressed="true"><b>레벨 1 · 기본</b><span>쉬운 설명을 따라가는 자동 가이드</span></button>
+        <button class="level-btn" data-level="2" aria-pressed="false"><b>레벨 2 · 중급</b><span>홉 확장·휴리스틱·위험도 직접 조작</span></button>
+        <button class="level-btn" data-level="3" aria-pressed="false"><b>레벨 3 · 심화</b><span>디믹싱·크로스체인·exposure·export</span></button>
+      </div>
+      <div class="level-summary" id="levelSummary" aria-live="polite"><b>가이드 투어.</b> 자동 진행을 누르면 자금 경로가 한 단계씩 열리고 쉬운 설명이 따라온다.</div>
+      <div class="sim-layout">
+        <aside class="sim-controls" aria-label="시뮬레이션 제어">
+          <h3>분석 조건</h3><p id="simControlHelp">조작은 자동 진행·초기화만 제공한다. 먼저 흐름과 증거 수준의 차이를 익힌다.</p>
+          <div class="level-2">
+            <span class="sim-label">SCENARIO</span>
+            <div class="scenario-set" role="group" aria-label="시나리오 선택">
+              <button class="scenario-btn" data-sim="direct" aria-pressed="true">직접 유입</button>
+              <button class="scenario-btn" data-sim="mixer" aria-pressed="false">믹서 후보집합</button>
+              <button class="scenario-btn level-3" data-sim="bridge" aria-pressed="false">브릿지 이동</button>
+            </div>
+            <span class="sim-label">일반 휴리스틱</span>
+            <div class="toggle-set" id="generalHeuristics" role="group" aria-label="일반 휴리스틱 토글">
+              <button class="toggle-btn" data-rule="pass" aria-pressed="true">통과 패턴</button>
+              <button class="toggle-btn" data-rule="cluster" aria-pressed="true">클러스터</button>
+              <button class="toggle-btn" data-rule="service" aria-pressed="true">서비스 라벨</button>
+            </div>
+            <label class="sim-label" for="simThreshold">추론 confidence 표시 임계값</label>
+            <div class="threshold-row"><input id="simThreshold" type="range" min="20" max="90" step="5" value="50"><output id="simThresholdOut" for="simThreshold">50%</output></div>
+          </div>
+          <div class="advanced-box level-3">
+            <span class="sim-label">DEMIXING HEURISTICS</span>
+            <div class="toggle-set" id="demixHeuristics" role="group" aria-label="디믹싱 휴리스틱 선택">
+              <button class="toggle-btn" data-rule="h1" aria-pressed="true">H1 주소 재사용</button>
+              <button class="toggle-btn" data-rule="h2" aria-pressed="true">H2 직접 연결</button>
+              <button class="toggle-btn" data-rule="h3" aria-pressed="false">H3 FIFO</button>
+            </div>
+            <span class="sim-label">EXPOSURE MODEL</span>
+            <div class="select-row"><select id="exposureModel" aria-label="익스포저 계산 방식"><option value="haircut">Haircut · 비례 배분</option><option value="poison">Poison · 전액 오염</option><option value="fifo">FIFO · 선입선출</option></select><button class="sim-action" id="bridgeFocus">크로스체인</button></div>
+            <p class="level-cap" id="exposureNote">현재 모델의 합성 exposure: 계산 전</p>
+          </div>
+          <div class="sim-actions">
+            <button class="sim-action primary level-2" id="simNext">다음 홉 확장</button>
+            <button class="sim-action" id="simPlay">가이드 자동 진행</button>
+            <button class="sim-action" id="simReset">초기화</button>
+            <button class="sim-action level-3" id="simExport">증거 JSON 내보내기</button>
+          </div>
+          <div class="sim-legend" aria-label="그래프 범례"><span><i class="sim-dot observed"></i>원장 관측</span><span><i class="sim-dot inferred"></i>추론 연결</span><span><i class="sim-dot leverage"></i>귀속 접점</span><span><i class="sim-dot filtered"></i>비활성·임계값 미달</span></div>
+        </aside>
+        <div class="sim-main">
+          <div class="sim-canvas">
+            <div class="sim-topline"><div><h3 id="simTitle">직접 유입: VASP까지의 경로</h3><p id="simSubtitle">합성 0xA에서 출발해 공개 원장의 직접 전송을 따라간다.</p><div class="risk-readout level-2"><span>현재 위험도</span><span class="risk-track"><i class="risk-fill" id="riskFill"></i></span><b class="risk-value" id="riskValue">0 / 100</b></div></div><div class="sim-step-count" id="simStepCount">STEP 0 / 5</div></div>
+            <div class="graph-wrap"><svg id="simGraph" viewBox="0 0 900 430" role="img" aria-labelledby="simGraphTitle simGraphDesc"><title id="simGraphTitle">합성 가상자산 거래 추적 그래프</title><desc id="simGraphDesc">선택한 시나리오의 단계별 거래 연결과 증거 수준을 나타낸다.</desc></svg></div>
+            <div class="sim-readout"><div><h4 id="simFocusTitle">출발점: Seed 주소</h4><p id="simFocusBody">가이드 자동 진행을 누르면 첫 거래부터 차례로 설명한다.</p></div><div><h4>현재 증거</h4><ul class="sim-evidence" id="simEvidence"><li>합성 seed만 로드됨</li></ul></div></div>
+          </div>
+          <div class="sim-disclaimer"><b>판독 규칙:</b> 선이 이어졌다는 사실은 동일인 확정이 아니다. 실명 귀속은 거래소·수탁자 등 제3자의 KYC, 서버, 장치 자료가 법적 절차로 결합될 때 성립한다. 점수와 export는 인터랙션 설명용 합성값이며 상용 제품의 위험점수·수사 증거가 아니다.</div>
+        </div>
+      </div>
+    </div></section>
+
+    <section id="cases"><div class="wrap">
+      <div class="section-head"><div class="section-no">05D / CASE RECONSTRUCTION</div><div><h2>실제 사건은 그래프가 아니라 “교차검증의 체인”으로 끝난다</h2><p>해외 사례에서 반복된 종료점은 거래소, 서버, 장치, 운영 인프라다. 각 카드의 단계는 확보된 법정·정부 문서 범위와 2차 보도의 한계를 함께 표시했다.</p></div></div>
+      <div class="case-grid">
+        <article class="case-card"><span class="tag verified">법원 제출 문서</span><h3>Welcome to Video</h3><ol><li>사이트가 사용자별 고유 BTC deposit address 발급</li><li>서버 포렌식 이미지의 username·download 기록과 결제 샘플 교차검증</li><li>블록체인 분석으로 WTV에 유입된 주소와 3개 거래소 계정 연결</li><li>거래소 계정을 압수 대상 자산으로 특정</li></ol><p class="decision"><b>결정적 연결:</b> 온체인 클러스터 단독이 아니라 서버 고객 DB × 결제 × 거래소 계정. 특정 상용 도구 사용은 법정 문서에 명시되지 않았다. <a href="https://www.scribd.com/document/430595306/USA-vs-Twenty-Four-Cryptocurrency-Accounts" target="_blank" rel="noopener">문서</a></p></article>
+        <article class="case-card"><span class="tag verified">정부 1차 자료</span><h3>Tornado Cash · Lazarus</h3><ol><li>OFAC 지정 blocked wallet에서 Tornado Cash로 향한 flow 확인</li><li>2022년 4–5월 Lazarus 해킹 수익 세탁 정황 추적</li><li>운영자들의 제재 변경 인식에 관한 공소 주장과 private chat 결합</li><li>인프라·결제 기록으로 운영자 신원 연결</li></ol><p class="decision"><b>결정적 연결:</b> 믹서 내부 링크의 확정이 아니라 지정 주소의 경계 흐름 × 운영 인프라. 혐의와 공소 주장은 유죄 확정과 구분해야 한다. <a href="https://www.irs.gov/compliance/criminal-investigation/tornado-cash-founders-charged-with-money-laundering-and-sanctions-violations" target="_blank" rel="noopener">IRS-CI</a></p></article>
+        <article class="case-card"><span class="tag verified">정부 1차 + 추론</span><h3>ChipMixer</h3><ol><li>서비스 자금 흐름과 범죄 서비스 연계 클러스터를 조사</li><li>도메인·GitHub·backend server라는 운영 인프라 식별</li><li>법원 승인으로 도메인 2개와 GitHub 계정 압수</li><li>독일 BKA가 backend server와 4,600만 달러 초과 암호자산 압수; 운영자 기소</li></ol><p class="decision"><b>확인 범위:</b> 2017–2023년 약 30억 달러 처리와 압수 사실은 DOJ 1차. complaint 본문의 구체 tracing 단계는 미확보다. <a href="https://www.justice.gov/usao-edpa/pr/justice-department-investigation-leads-takedown-darknet-cryptocurrency-mixer-processed" target="_blank" rel="noopener">DOJ</a></p></article>
+        <article class="case-card"><span class="tag verified">정부 1차 + 법정 쟁점</span><h3>Bitcoin Fog</h3><ol><li>Reactor로 자금 경로를 구성</li><li>TRM Labs로 결과 교차검증</li><li>5개 주소는 블록체인을 수동 분석해 재검증</li><li>체포 시 소지품·포럼 게시물·IP 등 다른 증거와 결합</li></ol><p class="decision"><b>법정 교훈:</b> Daubert 판단 분석은 방법론을 인정하면서 블록체인 분석을 “minor witness”로 다뤘다. defense report는 false positive 통계 부족과 peel-chain attribution FDR 51.64%를 문제 삼았다. Daubert 원문은 미확보다. <a href="http://storage.courtlistener.com/recap/gov.uscourts.dcd.232431/gov.uscourts.dcd.232431.159.1.pdf" target="_blank" rel="noopener">반대측 전문가 보고서</a></p></article>
+        <article class="case-card"><span class="tag unknown">2차 보도만 확인</span><h3>Silk Road</h3><ol><li>아이슬란드 서버의 지갑 주소 확보</li><li>압수 laptop의 지갑 주소와 blockchain direct flow 교차검증</li><li>2차 보도상 laptop의 144,000 BTC 중 약 90%가 서버에서 이전</li><li>private key·관리자 증거와 결합해 운영자 연결</li></ol><p class="decision"><b>결정적 연결:</b> 거래소 소환장이 아니라 서버 지갑 ↔ 압수 장치의 직접 흐름. 법정 문서 직접 인용은 이번 조사에서 확인하지 못했다. <a href="https://www.computerworld.com/article/1626194/fbi-consultant-silk-road-founder-had-16-18m-worth-of-bitcoins-on-laptop.html" target="_blank" rel="noopener">재판 보도</a></p></article>
+        <article class="case-card"><span class="tag verified">TRM 공식 절차</span><h3>A–D 조사 루프</h3><ol><li><b>A 입력:</b> tx hash·incoming/outgoing address를 추적 도구에 넣는다</li><li><b>B 매핑:</b> transaction network를 펼쳐 leverage point를 찾는다</li><li><b>C 제3자:</b> address controller 정보를 가진 VASP·custodian을 식별한다</li><li><b>D 법적 절차:</b> 제3자로부터 KYC·계정·IP 자료를 확보한다</li></ol><p class="decision"><b>운영 원칙:</b> Identify illicit conduct → Trace proceeds → Seek disruption → Serve legal process. 이것이 도구 화면과 실제 신원확정 사이의 빠진 절차다. <a href="https://www.trmlabs.com/guides/the-blockchain-investigators-flip-book-a-guide-for-law-enforcement" target="_blank" rel="noopener">공식 Flip Book</a></p></article>
+      </div>
+      <div class="panel" style="margin-top:14px"><span class="tag inferred">실무 판정 게이트</span><h3 style="margin-top:12px">그래프 edge가 곧 사람은 아니다</h3><p><b>1차 관측</b>(tx·event·trace) → <b>기계 추론</b>(cluster·exposure·signature) → <b>분석가 검토</b>(대안 가설·오탐 예외) → <b>독립 교차검증</b>(복수 도구·수동 재현) → <b>법적 귀속</b>(KYC·서버·장치)의 순서를 지켜야 한다. 중간 단계를 건너뛰면 “같은 주소군”을 “같은 자연인”으로 오인할 수 있다.</p></div>
+    </div></section>
+
+    <section id="privacy"><div class="wrap">
+      <div class="section-head"><div class="section-no">06 / PRIVACY SYSTEMS</div><div><h2>프라이버시 체인에서도 “무엇이 숨고 무엇이 남는가”를 분리한다</h2><p>암호학적으로 감춰진 필드와 경계·네트워크·행동에서 남는 단서는 서로 다르다. 확률적 추정은 평문 복구나 개인 식별과 같은 말이 아니다.</p></div></div>
+      <div class="deep-grid">
+        <article class="deep-card">
+          <span class="tag verified">Monero</span><h3>링 16개 중 실제 입력 1개</h3>
+          <ul><li><b>Ring signature:</b> 실제 입력 1 + decoy 15. key image로 이중지출만 방지하고 실제 입력은 공개하지 않는다.</li><li><b>RingCT:</b> Pedersen commitment로 금액을 숨기고 Bulletproofs+ 범위증명으로 합 보존을 검증한다.</li><li><b>Stealth address:</b> 수취인 공개키에서 one-time 주소를 만들어 실제 수취 주소를 체인에 노출하지 않는다.</li><li><b>Dandelion++:</b> stem 소수 경로 뒤 fluff 확산으로 first-spy IP 추정을 약화한다.</li></ul>
+          <p>OSPEAD의 기존 분포 기준 MAP decoder 평균 성공률은 23.5%(명목상 1/16=6.25%), effective ring size 4.2로 보고됐다. 제안 분포 적용 추정은 7.6%, 13.2다. 이는 <b>평균적 최선 추정</b>이며 개별 링 확정이 아니다. <a class="source-link" href="https://github.com/Rucknium/OSPEAD/blob/main/README.md" target="_blank" rel="noopener">OSPEAD</a></p>
+        </article>
+        <article class="deep-card">
+          <span class="tag verified">Zcash</span><h3>note commitment와 nullifier는 직접 연결되지 않는다</h3>
+          <ul><li>note commitment가 value·recipient·randomness를 숨겨 Merkle tree에 들어간다.</li><li>spend 시 nullifier를 공개해 중복지출을 막지만 commitment와 직접 연결되지 않는다.</li><li>zk proof는 note membership, spending key, nullifier 계산, 가치 보존을 증명한다.</li><li>transparent↔shielded 경계의 net value·시간·공개 주소는 보이지만 z→z 내부 sender·recipient·개별 금액은 보이지 않는다.</li></ul>
+          <p>2018년 Sprout 사용행태 연구의 boundary analysis는 founder/miner 패턴 65.6%와 일반 휴리스틱 3.5%, 총 69.1%의 익명집합 축소를 주장했다. <b>현행 Orchard 등에 그대로 적용할 수 없는 시대·풀 종속 수치</b>다. <a class="source-link" href="http://arxiv.org/pdf/1805.03180" target="_blank" rel="noopener">Kappos et al.</a></p>
+        </article>
+        <article class="deep-card wide">
+          <span class="tag inferred">2차 SOP 기반 · 공식 재검증 미완</span><h3>크로스체인은 “시간이 비슷하다”보다 메시지 키가 먼저다</h3>
+          <div class="chain-key"><div class="chain-node"><b>Wormhole · source</b>LogMessagePublished<br>sequence + emitter chain + emitter address</div><div class="chain-arrow">↔</div><div class="chain-node"><b>destination</b>TransferRedeemed<br>동일 메시지 키</div></div>
+          <div class="chain-key"><div class="chain-node"><b>LayerZero · source</b>Packet / PacketSent<br>nonce + src/dst chain + sender/receiver</div><div class="chain-arrow">↔</div><div class="chain-node"><b>destination</b>PacketReceived / executor delivery<br>동일 packet 식별자</div></div>
+          <div class="chain-key"><div class="chain-node"><b>Across · source</b>FundsDeposited<br>deposit ID + src/dst</div><div class="chain-arrow">↔</div><div class="chain-node"><b>destination</b>FilledRelay<br>동일 deposit ID</div></div>
+          <p>2차 SOP의 기술 설명상 이벤트 키가 맞으면 체인 간 링크는 결정적이다. 다만 이번 조사에서는 공식 프로토콜 문서로 이벤트명과 키를 재검증하지 못했다. 키가 없거나 유동성 네트워크가 중간 정산을 수행하면 금액(수수료 차감), 시간창, relayer/filler 재사용을 묶은 <b>추론 점수</b>로 내려간다. <a class="source-link" href="https://github.com/gl0bal01/intel-codex/blob/HEAD/Investigations/Techniques/sop-blockchain-investigation.md" target="_blank" rel="noopener">이벤트 SOP</a></p>
+        </article>
+      </div>
+      <div class="visibility" aria-label="관측 가능성 요약">
+        <article><h3>확정적으로 볼 수 있음</h3><ul><li>공개체인 거래·이벤트·call trace</li><li>공개체인에 기록된 브릿지 이벤트 자체</li><li>Tornado 입출금 시간·금액·relayer</li><li>CREATE/CREATE2 파생관계</li></ul></article>
+        <article><h3>확률적으로 좁힐 수 있음</h3><ul><li>UTXO 주소 클러스터</li><li>Tornado H1/H2/H3 연결</li><li>가스·수수료·지갑 행동 지문</li><li>Monero OSPEAD·first-spy 추정</li><li>브릿지 메시지 키 매칭(2차 SOP, 공식 재검증 미완)</li><li>시간–가치 기반 브릿지 매칭</li></ul></article>
+        <article><h3>온체인만으로 볼 수 없음</h3><ul><li>자연인의 실명</li><li>서비스 omnibus 지갑 내부 고객</li><li>Monero 실제 sender·금액·수취인</li><li>Zcash z→z 내부 경로</li><li>private RPC 사용 여부</li><li>상용 위험점수의 내부 가중치</li></ul></article>
+      </div>
+    </div></section>
+
+    <section id="capability"><div class="wrap">
+      <div class="section-head"><div class="section-no">07 / CAPABILITY</div><div><h2>현재 수행능력: “관찰→위험화→사례화”는 강해지고 있다</h2><p>그러나 “실시간 전수 감시→자동 실명 확정→자동 과세”로 읽으면 과장이다. 각 단계의 공개 근거와 병목을 분리했다.</p></div></div>
+      <div class="cap-list">
+        <div class="cap-row"><strong>거래 흐름 관찰</strong><span class="tag verified">강함</span><p>공개체인의 거래 그래프는 재현 가능하다. BTC·ETH 흐름 시각화, 주소 클러스터링 기능이 조달 보도에 명시됐다.</p></div>
+        <div class="cap-row"><strong>복합 패턴 탐지</strong><span class="tag verified">구축 중</span><p>연 80억 건 거래명세서에 AI·ML·통계를 적용하고, 연령·성별·지역 및 거래유형 데이터를 결합하는 시스템이 2026년 말 완료 계획이다.</p></div>
+        <div class="cap-row"><strong>주소–실명 귀속</strong><span class="tag inferred">조건부</span><p>거래소 KYC·법집행 자료·테스트 입출금·공개 주소와 만날 때 강해진다. 순수 온체인만으로 소유자를 확정하지는 못한다.</p></div>
+        <div class="cap-row"><strong>믹서 역추적</strong><span class="tag unknown">정량 불명</span><p>제품 기능으로 명시됐지만 자체 알고리즘, 성공률, 오탐·미탐, 사건 단위 성과가 공개되지 않았다.</p></div>
+        <div class="cap-row"><strong>크로스체인</strong><span class="tag unknown">범위 불명</span><p>100개 이상 체인 지원은 제안요청서 원문을 확보하지 못해 확인할 수 없다. 구체 지원 체인 목록도 비공개다.</p></div>
+        <div class="cap-row"><strong>강제집행</strong><span class="tag verified">거래소 중심</span><p>국내 거래소 계정에서는 개인키가 아니라 출금·반환청구채권을 압류해 동결·매각한다. 셀프커스터디에는 같은 방식이 통하지 않는다.</p></div>
+      </div>
+    </div></section>
+
+    <section id="limits"><div class="wrap">
+      <div class="section-head"><div class="section-no">08 / BLIND SPOTS</div><div><h2>사각지대는 암호기술보다 “증거 연결의 끊김”에서 커진다</h2><p>흐름을 봐도 납세자·취득가·양도가·거래 목적을 모르면 과세 사실을 완성할 수 없다. 다음은 공개 자료에서 확인되는 주요 병목이다.</p></div></div>
+      <div class="risk-grid">
+        <article class="risk"><div class="severity">HIGH · CRYPTOGRAPHIC</div><h3>Monero</h3><p>링서명(링사이즈 16), 스텔스 주소, RingCT가 송신 입력·수신자·금액을 숨긴다. BTC식 확정 흐름 추적은 어렵고 IP·거래소·사용자 실수 같은 외부 단서에 의존한다. 공개 검증된 완전 추적법은 없다.</p></article>
+        <article class="risk"><div class="severity">HIGH · OWNERSHIP</div><h3>셀프커스터디</h3><p>주소 이동은 보여도 매매인지 자기 보관 이전인지, 누가 소유하는지, 취득·양도가가 얼마인지 온체인만으로 확정하기 어렵다. 국세청도 미신고 거래를 모두 식별하기 어렵다고 인정했다. <a class="source-link" href="https://www.tokenpost.kr/news/policy/401167" target="_blank" rel="noopener">근거 보기</a></p></article>
+        <article class="risk"><div class="severity">MED–HIGH · PRIVACY POOL</div><h3>Zcash shielded pool</h3><p>transparent 구간은 추적되지만 shielded-to-shielded 내부 경로는 보이지 않는다. 입·출구의 시간·금액 경계 분석은 가능하지만 내부 연결을 확정하지 못한다.</p></article>
+        <article class="risk"><div class="severity">MEDIUM · DATA GAP</div><h3>CARF 시차</h3><p>한국과 일부 국가는 2027년 첫 교환, 싱가포르·홍콩·스위스·캐나다·UAE는 2028년, 미국은 2029년으로 보도됐다. 초기 해외정보 공백은 존재하지만 역외거래 부과제척기간 때문에 장기 면책을 뜻하지 않는다.</p></article>
+        <article class="risk"><div class="severity">MEDIUM · MODEL RISK</div><h3>휴리스틱 오귀속</h3><p>CoinJoin, 서비스 집금, 컨트랙트 라우팅은 “같은 입력=같은 사람” 같은 단순 규칙을 깨뜨린다. 그래프 연결은 조사 단서이지 단독으로 법적 귀속을 보장하지 않는다.</p></article>
+        <article class="risk"><div class="severity">MEDIUM · ENFORCEMENT</div><h3>집행 가능한 접점</h3><p>거래소 수탁자산은 채권 압류가 가능하지만, 해외·P2P·개인지갑은 협조 주체와 개인키가 없으면 기술적 추적 이후 집행 단계가 막힐 수 있다.</p></article>
+      </div>
+    </div></section>
+
+    <section id="carf"><div class="wrap">
+      <div class="section-head"><div class="section-no">09 / EXCHANGE</div><div><h2>CARF는 ‘즉시 전세계 가시성’이 아니라 시차 있는 정보교환망</h2><p>첫 교환 연도는 국가군마다 다르다. 정보 공백은 조사 속도를 늦추지만, 이후 확보한 정보로 과세할 수 있는 제도적 시간창이 남는다.</p></div></div>
+      <div class="timeline">
+        <article class="time-card"><div class="year">2027</div><h3>한국·영국·일본·독일 등 46개국</h3><p>첫 정보교환 예정. 국내 거래소 자료제출 의무화와 함께 국세청 분석 기반이 넓어진다.</p></article>
+        <article class="time-card"><div class="year">2028</div><h3>싱가포르·홍콩·스위스·캐나다·UAE 등 29개국</h3><p>전년도까지 해당 관할에서 보고되는 거래정보의 자동교환은 시차가 존재한다.</p></article>
+        <article class="time-card"><div class="year">2029</div><h3>미국</h3><p>보도 기준 미국의 첫 교환 시점. 국가별 법제화·시행 일정은 별도 확인이 필요하다.</p></article>
+      </div>
+      <div class="panel" style="margin-top:14px"><span class="tag verified">법적 시간축</span><h3 style="margin-top:12px">역외거래 부과제척기간 7년 · 부정행위 시 15년</h3><p>CARF 도입 초기에 정보가 늦게 들어오더라도 나중에 확보한 자료로 추후 과세가 가능하다는 의미다. <a class="source-link" href="https://www.nabo.go.kr/board/file/bulkDown.do?idx=9433&bid=68" target="_blank" rel="noopener">국회예산정책처 자료</a></p></div>
+    </div></section>
+
+    <section id="seizure"><div class="wrap">
+      <div class="section-head"><div class="section-no">10 / COLLECTION</div><div><h2>1,461억 원은 “개인키 해킹”이 아니라 채권 압류의 성과</h2><p>2021–2024년 14,140명에게서 강제징수된 가상자산 관련 금액은 거래소라는 집행 가능한 수탁 접점을 이용한 법적·운영적 절차다.</p></div></div>
+      <div class="seizure">
+        <div class="seizure-step"><b>보유 확인</b><p>거래소 제출자료로 체납자 계정·보유를 확인</p></div>
+        <div class="seizure-step"><b>채권 압류</b><p>출금청구채권·반환청구채권을 압류·동결</p></div>
+        <div class="seizure-step"><b>납부 권고</b><p>자진 매각 또는 별도 납부를 안내</p></div>
+        <div class="seizure-step"><b>매각 통보</b><p>불응 시 체납자와 거래소에 예정 통보</p></div>
+        <div class="seizure-step"><b>계정 이전</b><p>가상자산을 세무서 계정으로 이전</p></div>
+        <div class="seizure-step"><b>시장가 매각</b><p>당일 시장가로 매각해 체납액에 충당</p></div>
+      </div>
+      <div class="split" style="margin-top:18px">
+        <article class="panel"><h3>왜 지갑 비밀번호가 필요 없었나</h3><p>압류 대상이 온체인 개인키 그 자체가 아니라 거래소에 대한 출금·반환청구권이었기 때문이다. 거래소가 동결·이전·매각을 수행하는 구조다.</p><p><a class="source-link" href="https://www.mk.co.kr/news/economy/9786877" target="_blank" rel="noopener">2021년 대규모 사례</a></p></article>
+        <article class="panel"><h3>셀프커스터디에서는 왜 달라지나</h3><p>거래소가 보관하지 않으면 압류할 청구채권이 없다. 주소 귀속, 개인키 확보, 해외사업자 협조가 별도 병목이 된다. 이 부분은 강제징수 구조와 공개 추적기술을 결합한 추론이다.</p><p><a class="source-link" href="https://www.mk.co.kr/news/economy/11425454" target="_blank" rel="noopener">2021–2024 집계</a></p></article>
+      </div>
+    </div></section>
+
+    <section id="unknowns"><div class="wrap">
+      <div class="section-head"><div class="section-no">11 / OPEN QUESTIONS</div><div><h2>공개자료가 답하지 않는 것</h2><p>아래 항목을 확정치처럼 쓰면 다시 창작 보고서가 된다.</p></div></div>
+      <div class="open-list">
+        <details open><summary>제안요청서 원문 기반 상세 스펙</summary><p>7천만 개 이상 자산 그래프, 100개 이상 체인, IP·위치·Tor, 다크웹·텔레그램 OSINT, 법정 심리 컨설팅은 원문 PDF를 확보하지 못했다. 현재는 검증된 조달 요구사항으로 단정할 수 없다.</p></details>
+        <details><summary>TranSight 내부 룰셋과 위험점수 산식</summary><p>지원 체인 목록, 위험 카테고리, 룰 가중치, 데이터 소스 갱신주기, 오탐·미탐 지표는 공개되지 않았다.</p></details>
+        <details><summary>믹서 역추적의 정량 성공률</summary><p>기능 보유 주장은 보도됐지만 사건별 precision/recall, 후보군 축소율, 법정 채택 사례는 확인되지 않았다.</p></details>
+        <details><summary>두 시스템의 실제 연동 방식</summary><p>TranSight가 통합분석시스템에 API·배치·수동 보고서 중 어떤 방식으로 들어가는지 직접 언급한 공개 자료가 없다.</p></details>
+        <details><summary>CARF 비포괄 경로 비중</summary><p>보도된 수치는 체이널리시스 원 보고서가 아니라 타이거리서치 인용 보도 기준이므로, 원자료 확보 전에는 2차 인용으로만 다뤄야 한다.</p></details>
+      </div>
+    </div></section>
+
+    <section id="sources"><div class="wrap">
+      <div class="section-head"><div class="section-no">12 / SOURCES</div><div><h2>핵심 출처</h2><p>조사 스냅샷은 2026년 9월 27일 기준이다. 기사·공식·학술 자료의 역할을 구분해 읽어야 한다.</p></div></div>
+      <ol class="source-list">
+        <li><div><b>국세청·경찰청 보난자팩토리 선정</b><a href="https://v.daum.net/v/20260618180506824" target="_blank" rel="noopener">https://v.daum.net/v/20260618180506824</a></div></li>
+        <li><div><b>2026년 거래추적 SW 조달 공고 미러</b><a href="https://dima-g2b.com/list/R26BK01455053" target="_blank" rel="noopener">https://dima-g2b.com/list/R26BK01455053</a></div></li>
+        <li><div><b>통합분석시스템 80억 건·AI 분석</b><a href="https://www.mk.co.kr/news/economy/11970240" target="_blank" rel="noopener">https://www.mk.co.kr/news/economy/11970240</a></div></li>
+        <li><div><b>통합분석시스템 사전규격·약 30억</b><a href="https://www.mk.co.kr/news/stock/11978457" target="_blank" rel="noopener">https://www.mk.co.kr/news/stock/11978457</a></div></li>
+        <li><div><b>국회예산정책처 관련 보고서</b><a href="https://www.nabo.go.kr/board/file/bulkDown.do?idx=9433&amp;bid=68" target="_blank" rel="noopener">https://www.nabo.go.kr/board/file/bulkDown.do?idx=9433&amp;bid=68</a></div></li>
+        <li><div><b>SKAI·AgensGraph 기술 보도</b><a href="https://v.daum.net/v/20260706140318646" target="_blank" rel="noopener">https://v.daum.net/v/20260706140318646</a></div></li>
+        <li><div><b>Tornado Cash 디믹싱 공개 연구</b><a href="https://arxiv.org/pdf/2510.09433v1" target="_blank" rel="noopener">https://arxiv.org/pdf/2510.09433v1</a></div></li>
+        <li><div><b>Bitcoin 주소 클러스터링 기초 연구</b><a href="https://arxiv.org/abs/1107.4524" target="_blank" rel="noopener">https://arxiv.org/abs/1107.4524</a></div></li>
+        <li><div><b>셀프커스터디 식별 한계</b><a href="https://www.tokenpost.kr/news/policy/401167" target="_blank" rel="noopener">https://www.tokenpost.kr/news/policy/401167</a></div></li>
+        <li><div><b>CARF 국가별 교환 시차</b><a href="https://news.tf.co.kr/read/economy/2366019.htm" target="_blank" rel="noopener">https://news.tf.co.kr/read/economy/2366019.htm</a></div></li>
+        <li><div><b>2021–2024 강제징수 1,461억</b><a href="https://www.mk.co.kr/news/economy/11425454" target="_blank" rel="noopener">https://www.mk.co.kr/news/economy/11425454</a></div></li>
+        <li><div><b>출금·반환청구채권 압류 원리</b><a href="https://www.mk.co.kr/news/economy/9786877" target="_blank" rel="noopener">https://www.mk.co.kr/news/economy/9786877</a></div></li>
+        <li><div><b>UTXO 클러스터링과 공동입력 휴리스틱</b><a href="http://arxiv.org/pdf/1706.00916v2" target="_blank" rel="noopener">http://arxiv.org/pdf/1706.00916v2</a></div></li>
+        <li><div><b>CoinJoin 구조 지문 연구</b><a href="https://arxiv.org/pdf/2109.10229" target="_blank" rel="noopener">https://arxiv.org/pdf/2109.10229</a></div></li>
+        <li><div><b>Tornado Cash H1·H2·H3 방법론</b><a href="https://arxiv.org/pdf/2510.09433v2" target="_blank" rel="noopener">https://arxiv.org/pdf/2510.09433v2</a></div></li>
+        <li><div><b>Tornado Cash 연구 버전 상태</b><a href="https://arxiv.org/abs/2510.09433v1" target="_blank" rel="noopener">https://arxiv.org/abs/2510.09433v1</a></div></li>
+        <li><div><b>Tutela 가스·지갑 수수료 지문</b><a href="https://arxiv.org/pdf/2201.06811" target="_blank" rel="noopener">https://arxiv.org/pdf/2201.06811</a></div></li>
+        <li><div><b>Elliptic AML 그래프 데이터셋</b><a href="http://arxiv.org/abs/1908.02591" target="_blank" rel="noopener">http://arxiv.org/abs/1908.02591</a></div></li>
+        <li><div><b>GNN·TFGAT 성능 연구</b><a href="https://www.nature.com/articles/s41598-025-08365-9?error=cookies_not_supported&amp;code=50c3fb3f-a68c-4fff-a1ab-caaf612fa29c" target="_blank" rel="noopener">https://www.nature.com/articles/s41598-025-08365-9</a></div></li>
+        <li><div><b>Monero OSPEAD 확률 디코딩</b><a href="https://github.com/Rucknium/OSPEAD/blob/main/README.md" target="_blank" rel="noopener">https://github.com/Rucknium/OSPEAD/blob/main/README.md</a></div></li>
+        <li><div><b>Zcash shielded pool 경계 분석</b><a href="http://arxiv.org/pdf/1805.03180" target="_blank" rel="noopener">http://arxiv.org/pdf/1805.03180</a></div></li>
+        <li><div><b>브릿지 이벤트 매칭 조사 SOP</b><a href="https://github.com/gl0bal01/intel-codex/blob/HEAD/Investigations/Techniques/sop-blockchain-investigation.md" target="_blank" rel="noopener">https://github.com/gl0bal01/intel-codex/blob/HEAD/Investigations/Techniques/sop-blockchain-investigation.md</a></div></li>
+        <li><div><b>Chainalysis KYT 공식 제품·FAQ</b><a href="https://www.chainalysis.com/product/kyt/" target="_blank" rel="noopener">https://www.chainalysis.com/product/kyt/</a></div></li>
+        <li><div><b>Chainalysis Reactor 공식 제품</b><a href="https://www.chainalysis.com/product/reactor/" target="_blank" rel="noopener">https://www.chainalysis.com/product/reactor/</a></div></li>
+        <li><div><b>TRM Forensics 공식 제품</b><a href="http://www.trmlabs.com/blockchain-intelligence-platform/forensics" target="_blank" rel="noopener">http://www.trmlabs.com/blockchain-intelligence-platform/forensics</a></div></li>
+        <li><div><b>TRM 법집행 A–D 조사 절차</b><a href="https://www.trmlabs.com/guides/the-blockchain-investigators-flip-book-a-guide-for-law-enforcement" target="_blank" rel="noopener">https://www.trmlabs.com/guides/the-blockchain-investigators-flip-book-a-guide-for-law-enforcement</a></div></li>
+        <li><div><b>TRM 현장 Triage 가이드</b><a href="https://www.trmlabs.com/guides/identifying-crypto-artifacts-in-the-field-flip-book" target="_blank" rel="noopener">https://www.trmlabs.com/guides/identifying-crypto-artifacts-in-the-field-flip-book</a></div></li>
+        <li><div><b>TRM 공개 개발자 문서</b><a href="https://docs.trmlabs.com/" target="_blank" rel="noopener">https://docs.trmlabs.com/</a></div></li>
+        <li><div><b>Elliptic 플랫폼 공통 파이프라인</b><a href="https://www.elliptic.co/products/" target="_blank" rel="noopener">https://www.elliptic.co/products/</a></div></li>
+        <li><div><b>Elliptic Investigator</b><a href="https://www.elliptic.co/products/investigator/" target="_blank" rel="noopener">https://www.elliptic.co/products/investigator/</a></div></li>
+        <li><div><b>GraphSense transformation pipeline</b><a href="https://github.com/graphsense/graphsense-spark/blob/HEAD/README.md" target="_blank" rel="noopener">https://github.com/graphsense/graphsense-spark/blob/HEAD/README.md</a></div></li>
+        <li><div><b>GraphSense clustering v2.13.0</b><a href="https://github.com/graphsense/graphsense-lib/releases/tag/v2.13.0" target="_blank" rel="noopener">https://github.com/graphsense/graphsense-lib/releases/tag/v2.13.0</a></div></li>
+        <li><div><b>GraphSense CoinJoin 제외·cluster ID v2.15.0</b><a href="https://github.com/graphsense/graphsense-lib/releases/tag/v2.15.0" target="_blank" rel="noopener">https://github.com/graphsense/graphsense-lib/releases/tag/v2.15.0</a></div></li>
+        <li><div><b>GraphSense Addresses API</b><a href="https://github.com/graphsense/graphsense-lib/blob/HEAD/clients/python/docs/AddressesApi.md" target="_blank" rel="noopener">https://github.com/graphsense/graphsense-lib/blob/HEAD/clients/python/docs/AddressesApi.md</a></div></li>
+        <li><div><b>GraphSense Clusters API</b><a href="https://github.com/graphsense/graphsense-lib/blob/HEAD/clients/python/docs/ClustersApi.md" target="_blank" rel="noopener">https://github.com/graphsense/graphsense-lib/blob/HEAD/clients/python/docs/ClustersApi.md</a></div></li>
+        <li><div><b>Welcome to Video forfeiture complaint</b><a href="https://www.scribd.com/document/430595306/USA-vs-Twenty-Four-Cryptocurrency-Accounts" target="_blank" rel="noopener">https://www.scribd.com/document/430595306/USA-vs-Twenty-Four-Cryptocurrency-Accounts</a></div></li>
+        <li><div><b>Tornado Cash IRS-CI 발표</b><a href="https://www.irs.gov/compliance/criminal-investigation/tornado-cash-founders-charged-with-money-laundering-and-sanctions-violations" target="_blank" rel="noopener">https://www.irs.gov/compliance/criminal-investigation/tornado-cash-founders-charged-with-money-laundering-and-sanctions-violations</a></div></li>
+        <li><div><b>ChipMixer DOJ 발표</b><a href="https://www.justice.gov/usao-edpa/pr/justice-department-investigation-leads-takedown-darknet-cryptocurrency-mixer-processed" target="_blank" rel="noopener">https://www.justice.gov/usao-edpa/pr/justice-department-investigation-leads-takedown-darknet-cryptocurrency-mixer-processed</a></div></li>
+        <li><div><b>Bitcoin Fog IRS 판결 보도</b><a href="https://www.irs.gov/compliance/criminal-investigation/jury-finds-russian-swedish-operator-of-bitcoin-fog-guilty-of-running-the-darknet-cryptocurrency-mixer" target="_blank" rel="noopener">https://www.irs.gov/compliance/criminal-investigation/jury-finds-russian-swedish-operator-of-bitcoin-fog-guilty-of-running-the-darknet-cryptocurrency-mixer</a></div></li>
+        <li><div><b>Bitcoin Fog defense expert report</b><a href="http://storage.courtlistener.com/recap/gov.uscourts.dcd.232431/gov.uscourts.dcd.232431.159.1.pdf" target="_blank" rel="noopener">http://storage.courtlistener.com/recap/gov.uscourts.dcd.232431/gov.uscourts.dcd.232431.159.1.pdf</a></div></li>
+        <li><div><b>Silk Road 블록체인 재판 증언 보도</b><a href="https://www.computerworld.com/article/1626194/fbi-consultant-silk-road-founder-had-16-18m-worth-of-bitcoins-on-laptop.html" target="_blank" rel="noopener">https://www.computerworld.com/article/1626194/fbi-consultant-silk-road-founder-had-16-18m-worth-of-bitcoins-on-laptop.html</a></div></li>
+        <li><div><b>Chainalysis Academy 2026 CDAP 개편</b><a href="https://www.chainalysis.com/blog/new-chainalysis-academy-2026/" target="_blank" rel="noopener">https://www.chainalysis.com/blog/new-chainalysis-academy-2026/</a></div></li>
+        <li><div><b>Chainalysis 구·신 인증 매핑</b><a href="https://www.chainalysis.com/academy-launch/" target="_blank" rel="noopener">https://www.chainalysis.com/academy-launch/</a></div></li>
+        <li><div><b>Chainalysis CRC 공개 과정 개요</b><a href="https://www.scribd.com/document/632450170/Chainalysis-Reactor-Certification-Overview" target="_blank" rel="noopener">https://www.scribd.com/document/632450170/Chainalysis-Reactor-Certification-Overview</a></div></li>
+        <li><div><b>Chainalysis CISC 공개 과정 개요</b><a href="https://everpath-course-content.s3-accelerate.amazonaws.com/instructor%2Ftwiimd6dacphxj9igwlrlb1n%2Fpublic%2F1682635189%2FChainalysis-Investigation+Specialist-Certification-Overview-KR.pdf" target="_blank" rel="noopener">Chainalysis 자사 호스팅 PDF</a></div></li>
+        <li><div><b>TRM Academy 교육·인증</b><a href="https://www.trmlabs.com/training-and-certifications" target="_blank" rel="noopener">https://www.trmlabs.com/training-and-certifications</a></div></li>
+        <li><div><b>TRM Advanced Crypto Investigator 공개 주제</b><a href="https://dataexpert.eu/academy/trm-advanced-crypto-investigator" target="_blank" rel="noopener">https://dataexpert.eu/academy/trm-advanced-crypto-investigator</a></div></li>
+        <li><div><b>TRM Tracing on TRON 13개 모듈</b><a href="https://www.trmlabs.com/training-and-certifications/tracing-on-tron" target="_blank" rel="noopener">https://www.trmlabs.com/training-and-certifications/tracing-on-tron</a></div></li>
+        <li><div><b>TRM Blockchain Investigator's Flip Book PDF</b><a href="https://cdn.prod.website-files.com/6082dc5b670562507b3587b4/698a5391bf77755a3a3e924b_TRM%20-%20Blockchain%20Investigator%27s%20Flip%20Book%20-%20US.pdf" target="_blank" rel="noopener">TRM 공식 PDF</a></div></li>
+        <li><div><b>Elliptic 교육·훈련 프로그램</b><a href="https://www.elliptic.co/solutions/education-and-training" target="_blank" rel="noopener">https://www.elliptic.co/solutions/education-and-training</a></div></li>
+        <li><div><b>Elliptic FIU CONNECT 9개 주제</b><a href="https://www.elliptic.co/newsroom/elliptic-manchestercf-launch-crypto-compliance-certification/" target="_blank" rel="noopener">Elliptic × ManchesterCF 발표</a></div></li>
+        <li><div><b>Merkle Science Institute 인증</b><a href="https://www.merklescience.com/training-certifications" target="_blank" rel="noopener">https://www.merklescience.com/training-certifications</a></div></li>
+        <li><div><b>Merkle Science Investigations Guide 2025</b><a href="https://info.merklescience.com/investigations-guide-2025" target="_blank" rel="noopener">https://info.merklescience.com/investigations-guide-2025</a></div></li>
+        <li><div><b>Scorechain Academy 비인증 교육 범위</b><a href="https://scorechain.com/resources/scorechain-academy" target="_blank" rel="noopener">https://scorechain.com/resources/scorechain-academy</a></div></li>
+        <li><div><b>Scorechain 공개 AML 탐지 기법</b><a href="https://www.scorechain.com/resources/crypto-glossary/aml-solutions-crypto" target="_blank" rel="noopener">https://www.scorechain.com/resources/crypto-glossary/aml-solutions-crypto</a></div></li>
+        <li><div><b>Elliptic 믹서·프라이버시 지갑 통제</b><a href="https://www.elliptic.co/hubfs/Typologies-2022-Preventing%20Financial%20Crime%20in%20Crypto-NH.pdf" target="_blank" rel="noopener">Elliptic Typologies 2022 PDF</a></div></li>
+      </ol>
+    </div></section>
+  </main>
+
+  <footer><div class="wrap">본 문서는 공개자료 기반 기술 분석이다. 제품 기능 주장은 실증 성능과 구분했고, 확인되지 않은 내부 스펙은 “미확인”으로 유지했다.</div></footer>
+
+  <script>
+    const stageData = [
+      { code:'L1', title:'자료 수집', body:'국내 VASP가 제출하는 거래명세서와 블록체인 거래정보를 통합 관리하는 것이 공개된 핵심 기능이다.', bullets:['거래명세서 + 온체인 흐름','TranSight의 지갑·위험 신호 가능성','CARF 해외정보는 국가별 교환 시차 존재'], truth:'VASP·온체인 통합은 검증. 구체 커넥터와 실시간 주기는 비공개.' },
+      { code:'L2', title:'정규화·주소 해석', body:'UTXO, EVM 이벤트, 토큰·브릿지 로그를 분석 가능한 공통 구조로 바꾸는 계층이다.', bullets:['Bitcoin 입력·출력과 change 후보','EVM internal call + Transfer 로그','브릿지 lock/mint·burn/mint 이벤트'], truth:'체인별 해석은 업계 표준 기반 재구성. 국세청 구현 상세는 비공개.' },
+      { code:'L3', title:'엔티티·증거 그래프', body:'주소, 거래소 계정, 납세자, 자산, 거래 관계를 그래프로 묶어 다단계 흐름을 탐색한다.', bullets:['SKAI의 AgensGraph 기반 보도','주소 클러스터 + 엔티티 라벨','납세자별 자산 증감·잔고 조회'], truth:'AgensGraph·관계 시각화는 검증. 실제 그래프 스키마와 라벨 DB는 비공개.' },
+      { code:'L4', title:'탐지·위험 점수', body:'규칙·통계·머신러닝을 결합해 이상거래와 관계 패턴을 후보화하는 계층이다.', bullets:['스머핑·레이어링·믹서·DeFi 패턴','연령·성별·지역·거래유형 결합','GNN 기반 지갑 식별·맵 고도화'], truth:'기능·개발방향은 보도됨. 모델·가중치·정확도는 공개되지 않음.' },
+      { code:'L5', title:'사례 분석·시각화', body:'탐지 결과를 조사자가 검토할 수 있도록 거래 흐름, 클러스터, 최종 유입 거래소와 근거를 묶는다.', bullets:['다단계 자금흐름 시각화','믹서 전후 후보집합과 확률적 연결','분석 불가 시 사유 기록(경찰청 용역)'], truth:'시각화·분석지원은 검증. 자동화 비율과 처리 SLA는 미확인.' },
+      { code:'L6', title:'과세·징수·증거화', body:'거래 흐름만으로 과세가 완성되지는 않는다. 신고·거래소·소명 자료와 결합하고, 거래소 수탁자산은 채권 압류로 집행한다.', bullets:['거래소 계정·청구채권 동결','자진 납부 또는 매각 통보','세무서 계정 이전 후 시장가 매각'], truth:'거래소 중심 절차는 검증. 셀프커스터디 집행에는 별도 권한·키·협조가 필요.' }
+    ];
+    const buttons = document.querySelectorAll('.stage');
+    const panel = document.getElementById('stagePanel');
+    buttons.forEach(btn => btn.addEventListener('click', () => {
+      buttons.forEach(b => b.setAttribute('aria-selected','false'));
+      btn.setAttribute('aria-selected','true');
+      const d = stageData[Number(btn.dataset.stage)];
+      panel.innerHTML = '<div class="kicker">SELECTED LAYER · '+d.code+'</div><h3>'+d.title+'</h3><p>'+d.body+'</p><ul>'+d.bullets.map(x=>'<li>'+x+'</li>').join('')+'</ul><div class="truth-note"><b>증거 수준:</b> '+d.truth+'</div>';
+    }));
+
+
+    const simScenarios = {
+      direct: {
+        title:'직접 유입: VASP까지의 경로', subtitle:'합성 0xA에서 출발해 공개 원장의 직접 전송을 따라간다.',
+        nodes:[
+          {id:'a',label:'합성 Seed 0xA',score:'관측',kind:'observed',x:95,y:190,step:0,detail:'조사 시작점. tx hash·체인·시간을 케이스 원본으로 고정한다.'},
+          {id:'b',label:'분할 주소 B',score:'관측',kind:'observed',x:285,y:95,step:1,detail:'Seed에서 직접 전송된 두 갈래 중 하나다. 소유자 동일성은 아직 알 수 없다.'},
+          {id:'c',label:'통과 주소 C',score:'78%',kind:'inferred',x:285,y:285,step:2,conf:.78,detail:'짧은 시간 안에 잔액 전부를 이동한 pass-through 후보다.'},
+          {id:'d',label:'집금 주소 D',score:'관측',kind:'observed',x:500,y:190,step:3,detail:'B와 C의 자금이 같은 주소로 모인다. 합류는 관측되지만 동일인 증명은 아니다.'},
+          {id:'e',label:'거래소 입금군',score:'귀속 92%',kind:'leverage',x:720,y:190,step:4,conf:.92,detail:'공개 라벨·서비스 패턴으로 식별된 합성 VASP 클러스터. 기록 요청이 가능한 leverage point다.'}
+        ],
+        edges:[
+          {from:'a',to:'b',step:1,label:'1.20 BTC',kind:'observed'}, {from:'a',to:'c',step:2,label:'0.80 BTC',kind:'observed'},
+          {from:'b',to:'d',step:3,label:'1.19 BTC',kind:'observed',rule:'cluster'}, {from:'c',to:'d',step:3,label:'0.79 BTC',kind:'inferred',conf:.78,rule:'pass'},
+          {from:'d',to:'e',step:4,label:'1.97 BTC',kind:'observed',rule:'service'}
+        ],
+        evidence:['Seed 거래 원본 고정','직접 출력 1.20 BTC 확인','전액 재이동·짧은 시간창으로 pass-through 후보','B·C 자금의 합류 관측','라벨된 VASP 접점 도달 — KYC 요청은 별도 법적 절차']
+      },
+      mixer: {
+        title:'믹서: 확정 경로가 아닌 후보집합', subtitle:'동일 액면 풀에서 H1·H2·시간 신호가 후보를 어떻게 줄이는지 본다.',
+        nodes:[
+          {id:'a',label:'합성 입금자',score:'관측',kind:'observed',x:90,y:190,step:0,detail:'고정 액면 풀에 예치한 합성 주소다.'},
+          {id:'p',label:'10 ETH 풀',score:'관측',kind:'observed',x:300,y:190,step:1,detail:'입금과 출금 이벤트는 보이지만 내부 링크는 암호학적으로 끊겨 있다.'},
+          {id:'w1',label:'출금 후보 W1',score:'84%',kind:'inferred',x:520,y:70,step:2,conf:.84,detail:'주소 재사용 또는 직접 전송 신호가 있는 강한 후보. 그래도 개인 신원은 아니다.'},
+          {id:'w2',label:'출금 후보 W2',score:'58%',kind:'inferred',x:520,y:190,step:2,conf:.58,detail:'시간·가치 근접성이 있는 중간 후보. 임계값에 따라 보이거나 흐려진다.'},
+          {id:'w3',label:'출금 후보 W3',score:'31%',kind:'inferred',x:520,y:310,step:2,conf:.31,detail:'FIFO만 지지하는 약한 후보. 배제하지 않고 낮은 신뢰도로 보존한다.'},
+          {id:'e',label:'거래소 입금군',score:'귀속 93%',kind:'leverage',x:745,y:70,step:4,conf:.93,detail:'W1 후속 자금이 식별된 VASP로 유입된다. 여기서 법적 자료 요청으로 전환한다.'}
+        ],
+        edges:[
+          {from:'a',to:'p',step:1,label:'10 ETH',kind:'observed'},
+          {from:'p',to:'w1',step:2,label:'H1/H2',kind:'inferred',conf:.84,rule:'h1'},{from:'p',to:'w2',step:2,label:'H2 직접 연결',kind:'inferred',conf:.58,rule:'h2'},{from:'p',to:'w3',step:2,label:'H3 FIFO',kind:'inferred',conf:.31,rule:'h3'},
+          {from:'w1',to:'e',step:4,label:'9.97 ETH',kind:'observed',rule:'service'}
+        ],
+        evidence:['입금 이벤트와 액면 관측','풀 안에서 예치–출금 직접 링크는 끊김','세 출금 후보를 H1/H2·시간·FIFO로 점수화','임계값 아래 후보도 반증 가능성을 위해 보존','강한 후보의 VASP 유입 확인 — KYC 없이는 실명 미확정']
+      },
+      bridge: {
+        title:'브릿지: 메시지 키 우선 매칭', subtitle:'금액·시간 유사성보다 protocol event의 동일 식별자를 먼저 본다.',
+        nodes:[
+          {id:'a',label:'체인 A 주소',score:'관측',kind:'observed',x:85,y:190,step:0,detail:'소스 체인에서 자금 이동을 시작한 합성 주소다.'},
+          {id:'l',label:'Lock 이벤트',score:'관측',kind:'observed',x:270,y:105,step:1,detail:'소스 체인의 lock/burn 이벤트. tx hash와 log index를 고정한다.'},
+          {id:'m',label:'메시지 키 #731',score:'결정적 링크',kind:'observed',x:455,y:190,step:2,detail:'sequence·emitter·source/destination chain이 결합된 합성 메시지 식별자다.'},
+          {id:'n',label:'Mint 이벤트',score:'관측',kind:'observed',x:640,y:105,step:3,detail:'목적 체인의 mint/redeem 이벤트에서 같은 메시지 키를 확인했다.'},
+          {id:'x',label:'시간·가치 후보',score:'46%',kind:'inferred',x:455,y:320,step:2,conf:.46,detail:'메시지 키가 없다고 가정한 대안 경로. 시간·가치만으로는 약한 추론이다.'},
+          {id:'e',label:'수탁 서비스',score:'귀속 90%',kind:'leverage',x:805,y:190,step:4,conf:.90,detail:'목적 체인 자금이 도달한 합성 수탁 서비스. 관할권·자료보존이 다음 병목이다.'}
+        ],
+        edges:[
+          {from:'a',to:'l',step:1,label:'lock',kind:'observed'}, {from:'l',to:'m',step:2,label:'sequence 731',kind:'observed'},
+          {from:'a',to:'x',step:2,label:'time/value',kind:'inferred',conf:.46,rule:'h2'}, {from:'m',to:'n',step:3,label:'같은 key',kind:'observed'},
+          {from:'n',to:'e',step:4,label:'redeem→deposit',kind:'observed',rule:'service'}
+        ],
+        evidence:['소스 체인 seed 로드','lock/burn 이벤트 확인','메시지 식별자와 시간·가치 대안 경로 비교','목적 체인에서 동일 메시지 키 확인','수탁 서비스 도달 — 법적 절차로 계정 귀속 필요']
+      }
+    };
+    const simSVG = document.getElementById('simGraph');
+    const simNS = 'http://www.w3.org/2000/svg';
+    const simRoot = document.getElementById('simulator');
+    const levelCopy = {
+      1:{summary:'<b>가이드 투어.</b> 자동 진행을 누르면 자금 경로가 한 단계씩 열리고 쉬운 설명이 따라온다.',help:'조작은 자동 진행·초기화만 제공한다. 먼저 흐름과 증거 수준의 차이를 익힌다.'},
+      2:{summary:'<b>직접 분석.</b> 레벨 1 기능에 홉 확장, 시나리오 선택, 일반 휴리스틱과 위험도 판독이 추가됐다.',help:'다음 홉을 직접 열고 휴리스틱을 끄거나 임계값을 바꿔 결과 변화를 비교한다.'},
+      3:{summary:'<b>전체 수사관 모드.</b> 앞선 기능에 H1/H2/H3, 크로스체인, exposure 회계와 증거 export가 더해졌다.',help:'모든 제어를 자유롭게 조합한다. export에는 선택 조건과 현재까지의 합성 증거가 기록된다.'}
+    };
+    let simMode='direct', simLevel=1, simStep=0, simTimer=null, simSelected='a';
+    const activeRules=new Set(['pass','cluster','service','h1','h2']);
+    function simEl(name,attrs,text){ const el=document.createElementNS(simNS,name); Object.keys(attrs||{}).forEach(k=>el.setAttribute(k,attrs[k])); if(text!=null)el.textContent=text; return el; }
+    function ruleActive(edge){ return !edge.rule || activeRules.has(edge.rule) || simLevel<2; }
+    function riskScore(data,threshold){
+      let risk=0;
+      data.edges.filter(e=>e.step<=simStep&&ruleActive(e)).forEach(e=>{ if(e.kind==='inferred'&&(e.conf||0)>=threshold) risk=Math.max(risk,Math.round(e.conf*82)); });
+      data.nodes.filter(n=>n.step<=simStep&&n.kind==='leverage').forEach(n=>{ if(activeRules.has('service')) risk=Math.max(risk,Math.round((n.conf||.85)*100)); });
+      return risk;
+    }
+    function renderSimulation(){
+      const data=simScenarios[simMode];
+      const threshold=simLevel===1?0:Number(document.getElementById('simThreshold').value)/100;
+      simSVG.innerHTML='';
+      const defs=simEl('defs'); const marker=simEl('marker',{id:'simArrow',viewBox:'0 0 10 10',refX:'9',refY:'5',markerWidth:'7',markerHeight:'7',orient:'auto-start-reverse'});
+      marker.appendChild(simEl('path',{d:'M 0 0 L 10 5 L 0 10 z',fill:'currentColor'})); defs.appendChild(marker); simSVG.appendChild(defs);
+      simSVG.appendChild(simEl('title',{id:'simGraphTitle'},'합성 가상자산 거래 추적 그래프'));
+      simSVG.appendChild(simEl('desc',{id:'simGraphDesc'},data.title+' — 단계 '+simStep+'까지 표시'));
+      const map=Object.fromEntries(data.nodes.map(n=>[n.id,n]));
+      data.edges.forEach(e=>{
+        const from=map[e.from],to=map[e.to],pending=e.step>simStep,disabled=!ruleActive(e),filtered=disabled||(e.kind==='inferred'&&(e.conf||0)<threshold);
+        simSVG.appendChild(simEl('line',{x1:from.x+66,y1:from.y,x2:to.x-66,y2:to.y,class:'sim-edge '+(e.kind==='inferred'?'inferred ':'')+(pending?'pending ':'')+(filtered?'filtered':'')}));
+        if(!pending&&!disabled)simSVG.appendChild(simEl('text',{x:(from.x+to.x)/2,y:(from.y+to.y)/2-8,class:'sim-edge-label'},e.label));
+      });
+      data.nodes.forEach(n=>{
+        const incoming=data.edges.filter(e=>e.to===n.id), disabled=incoming.length&&incoming.every(e=>!ruleActive(e));
+        const pending=n.step>simStep,filtered=disabled||(n.kind==='inferred'&&(n.conf||0)<threshold);
+        const g=simEl('g',{class:'sim-node '+n.kind+(pending?' pending':'')+(filtered?' filtered':'')+(n.id===simSelected?' selected':''),transform:'translate('+(n.x-66)+' '+(n.y-30)+')',role:'button',tabindex:pending?'-1':'0','aria-label':n.label+', '+n.score});
+        g.appendChild(simEl('rect',{width:132,height:60})); g.appendChild(simEl('text',{x:66,y:25,class:'sim-node-title'},n.label)); g.appendChild(simEl('text',{x:66,y:43,class:'sim-node-score'},n.score));
+        const choose=()=>{simSelected=n.id;document.getElementById('simFocusTitle').textContent=n.label;document.getElementById('simFocusBody').textContent=n.detail;renderSimulation();};
+        g.addEventListener('click',choose); g.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();choose();}}); simSVG.appendChild(g);
+      });
+      document.getElementById('simTitle').textContent=data.title; document.getElementById('simSubtitle').textContent=data.subtitle;
+      document.getElementById('simStepCount').textContent='LEVEL '+simLevel+' · STEP '+simStep+' / 5';
+      const guide=data.evidence[Math.min(simStep,data.evidence.length-1)];
+      document.getElementById('simEvidence').innerHTML=data.evidence.slice(0,Math.max(1,simStep+1)).map(x=>'<li>'+x+'</li>').join('');
+      if(simLevel===1){document.getElementById('simFocusTitle').textContent='가이드 '+(simStep+1)+' · '+(simStep===0?'출발점 고정':'관측과 추론 구분');document.getElementById('simFocusBody').textContent=guide;}
+      const risk=riskScore(data,threshold); document.getElementById('riskFill').style.width=risk+'%'; document.getElementById('riskValue').textContent=risk+' / 100';
+      document.getElementById('simNext').disabled=simStep>=5;
+      const model=document.getElementById('exposureModel').value;
+      const exposure=simStep<2?0:Math.max(0,Math.min(100,Math.round(risk*(model==='poison'?1:model==='fifo'?.76:.58))));
+      document.getElementById('exposureNote').textContent='현재 모델의 합성 exposure: '+exposure+'% · '+({haircut:'비례 배분',poison:'전액 오염',fifo:'선입선출'}[model]);
+    }
+    function stopSimulation(){if(simTimer){clearInterval(simTimer);simTimer=null;document.getElementById('simPlay').textContent=simLevel===1?'가이드 자동 진행':'자동 진행';}}
+    function startSimulation(){
+      if(simTimer){stopSimulation();return;} if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){simStep=5;renderSimulation();return;}
+      if(simStep>=5)simStep=0; document.getElementById('simPlay').textContent='일시정지'; renderSimulation();
+      simTimer=setInterval(()=>{simStep+=1;renderSimulation();if(simStep>=5)stopSimulation();},1100);
+    }
+    function setLevel(level){
+      stopSimulation(); simLevel=level; simRoot.dataset.level=String(level);
+      document.querySelectorAll('.level-btn').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.level)===level)));
+      document.getElementById('levelSummary').innerHTML=levelCopy[level].summary; document.getElementById('simControlHelp').textContent=levelCopy[level].help;
+      document.getElementById('simPlay').textContent=level===1?'가이드 자동 진행':'자동 진행';
+      if(level<3&&simMode==='bridge'){simMode='direct';simStep=0;document.querySelectorAll('.scenario-btn').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.sim==='direct')));}
+      renderSimulation();
+    }
+    document.querySelectorAll('.level-btn').forEach(btn=>btn.addEventListener('click',()=>{setLevel(Number(btn.dataset.level));if(Number(btn.dataset.level)===1)startSimulation();}));
+    document.querySelectorAll('.scenario-btn').forEach(btn=>btn.addEventListener('click',()=>{stopSimulation();simMode=btn.dataset.sim;simStep=0;simSelected='a';document.querySelectorAll('.scenario-btn').forEach(b=>b.setAttribute('aria-pressed',String(b===btn)));document.getElementById('simFocusTitle').textContent='Seed 주소 선택';document.getElementById('simFocusBody').textContent='다음 홉 확장으로 관측 가능한 거래를 펼치고 노드를 선택해 판정 근거를 확인한다.';renderSimulation();}));
+    document.querySelectorAll('.toggle-btn').forEach(btn=>btn.addEventListener('click',()=>{const on=btn.getAttribute('aria-pressed')!=='true';btn.setAttribute('aria-pressed',String(on));if(on)activeRules.add(btn.dataset.rule);else activeRules.delete(btn.dataset.rule);renderSimulation();}));
+    document.getElementById('simThreshold').addEventListener('input',e=>{document.getElementById('simThresholdOut').value=e.target.value+'%';renderSimulation();});
+    document.getElementById('simNext').addEventListener('click',()=>{stopSimulation();simStep=Math.min(5,simStep+1);renderSimulation();});
+    document.getElementById('simReset').addEventListener('click',()=>{stopSimulation();simStep=0;simSelected='a';renderSimulation();});
+    document.getElementById('simPlay').addEventListener('click',startSimulation);
+    document.getElementById('bridgeFocus').addEventListener('click',()=>{simMode='bridge';simStep=0;simSelected='a';document.querySelectorAll('.scenario-btn').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.sim==='bridge')));renderSimulation();});
+    document.getElementById('exposureModel').addEventListener('change',renderSimulation);
+    document.getElementById('simExport').addEventListener('click',()=>{
+      const data=simScenarios[simMode], visibleEdges=data.edges.filter(e=>e.step<=simStep&&ruleActive(e));
+      const packet={notice:'학습용 합성 증거 — 실제 수사 자료가 아님',exported_at:new Date().toISOString(),level:simLevel,scenario:simMode,step:simStep,threshold:Number(document.getElementById('simThreshold').value)/100,heuristics:Array.from(activeRules),exposure_model:document.getElementById('exposureModel').value,evidence:data.evidence.slice(0,Math.max(1,simStep+1)),edges:visibleEdges};
+      const blob=new Blob([JSON.stringify(packet,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='synthetic-trace-evidence.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),0);
+      document.getElementById('simFocusTitle').textContent='증거 패킷 생성';document.getElementById('simFocusBody').textContent='현재 조건·휴리스틱·표시된 합성 edge를 JSON으로 내보냈다.';
+    });
+    setLevel(1);
+  </script>
+</body>
+</html>
