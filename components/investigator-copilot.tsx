@@ -1,7 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import type { GraphNode } from "@/lib/domain";
+import type {
+  EvidenceItem,
+  GraphNode,
+  Hypothesis,
+} from "@/lib/domain";
 import type {
   InvestigatorQuestion,
   InvestigatorResponse,
@@ -14,9 +18,19 @@ const prompts: Array<[InvestigatorQuestion, string]> = [
   ["NEXT_STEP", "What should I inspect next?"],
 ];
 
-export function InvestigatorCopilot({ node }: { node: GraphNode }) {
-  const [response, setResponse] = useState<InvestigatorResponse | null>(null);
-  const [loading, setLoading] = useState<InvestigatorQuestion | null>(null);
+export function InvestigatorCopilot({
+  node,
+  hypothesis,
+  evidence,
+}: {
+  node: GraphNode;
+  hypothesis: Hypothesis;
+  evidence: EvidenceItem[];
+}) {
+  const [response, setResponse] =
+    useState<InvestigatorResponse | null>(null);
+  const [loading, setLoading] =
+    useState<InvestigatorQuestion | null>(null);
   const [error, setError] = useState("");
 
   async function ask(question: InvestigatorQuestion) {
@@ -31,20 +45,28 @@ export function InvestigatorCopilot({ node }: { node: GraphNode }) {
         },
         body: JSON.stringify({
           question,
-          nodeId: node.id,
+          context: {
+            node,
+            hypothesis,
+            evidence,
+          },
         }),
       });
 
       const payload = await result.json();
 
       if (!result.ok) {
-        throw new Error(payload?.error || "Investigator request failed");
+        throw new Error(
+          payload?.error || "Investigator request failed",
+        );
       }
 
       setResponse(payload.data as InvestigatorResponse);
     } catch (caught) {
       setResponse(null);
-      setError(caught instanceof Error ? caught.message : "Request failed");
+      setError(
+        caught instanceof Error ? caught.message : "Request failed",
+      );
     } finally {
       setLoading(null);
     }
@@ -55,7 +77,7 @@ export function InvestigatorCopilot({ node }: { node: GraphNode }) {
       <div className="copilot-head">
         <div>
           <span className="eyebrow">INVESTIGATOR COPILOT</span>
-          <small>Deterministic MVP · no external model</small>
+          <small>Deterministic cited-context MVP · no external model</small>
         </div>
         <span className="copilot-status">LOCAL</span>
       </div>
@@ -77,14 +99,32 @@ export function InvestigatorCopilot({ node }: { node: GraphNode }) {
       {response && (
         <div className="copilot-response">
           <p>{response.answer}</p>
-          {response.evidenceRefs.length > 0 && (
-            <div className="copilot-refs">
-              <span>Evidence</span>
-              {response.evidenceRefs.map((ref) => <b key={ref}>{ref}</b>)}
+
+          {response.citations.length > 0 && (
+            <div className="copilot-citations">
+              <span>CITED CONTEXT</span>
+              {response.citations.map((citation) => (
+                <div key={citation.evidenceId}>
+                  <b>{citation.evidenceId}</b>
+                  <small>{citation.title}</small>
+                  {citation.source?.startsWith("http") && (
+                    <a
+                      href={citation.source}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      source ↗
+                    </a>
+                  )}
+                </div>
+              ))}
             </div>
           )}
+
           <div className="copilot-caution">
-            {response.cautions.map((item) => <span key={item}>{item}</span>)}
+            {response.cautions.map((item) => (
+              <span key={item}>{item}</span>
+            ))}
           </div>
         </div>
       )}
