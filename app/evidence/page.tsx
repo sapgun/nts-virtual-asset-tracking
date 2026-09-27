@@ -1,4 +1,6 @@
+import { EvidenceAuditTrail } from "@/components/evidence-audit-trail";
 import { StateBadge } from "@/components/state-badge";
+import { evidenceTransitionLedger } from "@/lib/evidence-audit-data";
 import { evidence, hypotheses, investigation } from "@/lib/mock-data";
 
 export default function EvidencePage() {
@@ -51,6 +53,8 @@ export default function EvidencePage() {
           </div>
         ))}
       </section>
+
+      <EvidenceAuditTrail events={evidenceTransitionLedger} />
     </div>
   );
 }
