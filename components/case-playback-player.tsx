@@ -148,8 +148,20 @@ export function CasePlaybackPlayer({ playback }: { playback: CasePlayback }) {
             >
               Previous
             </button>
-            <button className="play-button" onClick={() => setPlaying((value) => !value)}>
-              {playing ? "Pause" : stepIndex === playback.steps.length - 1 ? "Replay from here" : "Auto play"}
+            <button
+              className="play-button"
+              onClick={() => {
+                if (playing) {
+                  setPlaying(false);
+                  return;
+                }
+                if (stepIndex === playback.steps.length - 1) {
+                  setStepIndex(0);
+                }
+                setPlaying(true);
+              }}
+            >
+              {playing ? "Pause" : stepIndex === playback.steps.length - 1 ? "Replay" : "Auto play"}
             </button>
             <button
               onClick={() => {
