@@ -1,3 +1,4 @@
+import { InvestigatorCopilot } from "@/components/investigator-copilot";
 import { StateBadge } from "@/components/state-badge";
 import type { EvidenceItem, GraphNode, Hypothesis } from "@/lib/domain";
 
@@ -54,6 +55,10 @@ export function EvidencePanel({
             </article>
           ))}
         </div>
+      </div>
+
+      <div className="intel-block">
+        <InvestigatorCopilot node={selected} />
       </div>
     </aside>
   );
