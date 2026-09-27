@@ -4922,3 +4922,65 @@ button { color: inherit; }
     animation: none !important;
   }
 }
+
+
+/* spatial graph depth */
+.graph-stage-v3 {
+  perspective: 1100px;
+  transform-style: preserve-3d;
+}
+
+.graph-stage-v3 > svg {
+  position: relative;
+  z-index: 4;
+  transform:
+    rotateX(var(--graph-rx, 0deg))
+    rotateY(var(--graph-ry, 0deg))
+    translateZ(18px);
+  transform-origin: 50% 50%;
+  transition: transform .16s ease-out;
+  will-change: transform;
+}
+
+.graph-depth-plane {
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  height: 58%;
+  top: 24%;
+  pointer-events: none;
+  border: 1px solid rgba(110, 190, 235, .045);
+  border-radius: 50%;
+  background:
+    linear-gradient(rgba(128,162,196,.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(128,162,196,.022) 1px, transparent 1px);
+  background-size: 38px 38px;
+  transform-style: preserve-3d;
+}
+
+.depth-plane-a {
+  transform:
+    perspective(800px)
+    rotateX(73deg)
+    rotateZ(-7deg)
+    translateZ(-42px);
+  opacity: .62;
+}
+
+.depth-plane-b {
+  top: 34%;
+  border-color: rgba(157, 126, 255, .035);
+  transform:
+    perspective(800px)
+    rotateX(72deg)
+    rotateZ(10deg)
+    translateZ(-84px);
+  opacity: .45;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .graph-stage-v3 > svg {
+    transform: none !important;
+    transition: none !important;
+  }
+}
