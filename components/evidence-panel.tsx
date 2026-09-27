@@ -58,7 +58,11 @@ export function EvidencePanel({
       </div>
 
       <div className="intel-block">
-        <InvestigatorCopilot node={selected} />
+        <InvestigatorCopilot
+          node={selected}
+          hypothesis={hypothesis}
+          evidence={evidence}
+        />
       </div>
     </aside>
   );
