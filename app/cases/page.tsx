@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { StateBadge } from "@/components/state-badge";
 import { caseFiles } from "@/lib/mock-data";
 
@@ -25,7 +26,9 @@ export default function CasesPage() {
             <div className="case-side">
               <StateBadge state={caseFile.evidenceState} />
               <small>{caseFile.difficulty}</small>
-              <button disabled>Reconstruction queued</button>
+              <Link className="case-start-link" href={"/cases/" + caseFile.id}>
+                Start reconstruction ↗
+              </Link>
             </div>
           </article>
         ))}

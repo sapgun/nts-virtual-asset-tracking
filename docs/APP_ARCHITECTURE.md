@@ -147,3 +147,50 @@ Production connectors, private datasets, sensitive identity data, or automated n
 - signed evidence bundles
 - role-based access control
 - production-grade indexing
+
+
+## Implemented workflow extensions
+
+### Public observation → investigation
+
+```
+Graph Explorer
+  -> BlockscoutV2Adapter
+  -> NormalizedChainTransaction[]
+  -> session-scoped public draft
+  -> buildImportedInvestigation()
+  -> observation-only Investigation Lab
+```
+
+Imported public drafts never inherit the synthetic sandbox hypothesis. Counterparty nodes and transaction edges start as `OBSERVED`; the initial ownership hypothesis remains `UNVERIFIED`.
+
+### Repository boundary
+
+```
+Investigation API
+  -> InvestigationRepository
+     -> EphemeralInvestigationRepository (current)
+     -> PostgreSQLInvestigationRepository (planned)
+```
+
+The current repository is explicitly non-durable. It exists to stabilize the service contract before a database is provisioned.
+
+### Bridge matching
+
+Bridge correlation has two distinct modes:
+
+- `DETERMINISTIC_KEY`: same protocol message identifier observed on source and destination. Evidence state: `OBSERVED`.
+- `HEURISTIC`: time/value/asset/account similarity without a deterministic message identifier. Evidence state: `INFERRED`.
+- weak overlap remains `UNVERIFIED`.
+
+A bridge correspondence never implies common ownership or natural-person identity.
+
+### Cited-context Investigator
+
+The Investigator adapter now receives the active normalized context:
+
+- selected GraphNode,
+- active Hypothesis,
+- EvidenceItem[].
+
+Responses return structured evidence citations in addition to prose. The deterministic MVP therefore exercises the same provenance contract that a future external-model adapter must satisfy.

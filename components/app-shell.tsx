@@ -7,6 +7,8 @@ import type { ReactNode } from "react";
 const items = [
   ["/", "Command"],
   ["/investigations", "Investigation Lab"],
+  ["/explore", "Graph Explorer"],
+  ["/bridges", "Bridge Lab"],
   ["/cases", "Case Files"],
   ["/evidence", "Evidence Room"],
   ["/academy", "Academy"],
@@ -43,7 +45,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <span className="live-dot" />
           <div>
             <b>SAFE MODE</b>
-            <small>Curated + synthetic data</small>
+            <small>Public + curated safe data</small>
           </div>
         </div>
       </aside>
