@@ -5,6 +5,7 @@ import { EvidencePanel } from "@/components/evidence-panel";
 import { GraphCanvas } from "@/components/graph-canvas";
 import { StateBadge } from "@/components/state-badge";
 import type { GraphNode } from "@/lib/domain";
+import { buildEvidencePacket } from "@/lib/evidence-packet";
 import {
   buildImportedInvestigation,
   PUBLIC_IMPORT_STORAGE_KEY,
@@ -29,6 +30,7 @@ export function InvestigationWorkbench({
   const [importedModel, setImportedModel] =
     useState<ImportedInvestigationModel | null>(null);
   const [importError, setImportError] = useState("");
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     if (!importedMode) return;
@@ -94,7 +96,9 @@ export function InvestigationWorkbench({
     ...model.edges.map((edge) => edge.step),
   );
 
-  const exportEvidence = () => {
+  const exportEvidence = async () => {
+    setExporting(true);
+
     const payload = {
       notice: importedMode
         ? "Public-chain observation packet — no ownership or natural-person attribution."
@@ -105,10 +109,15 @@ export function InvestigationWorkbench({
       selectedNode: selected,
       evidence: model.evidence,
       hypotheses: [model.hypothesis],
-      exportedAt: new Date().toISOString(),
+      capture: {
+        step,
+        maxStep,
+      },
     };
 
-    const blob = new Blob([JSON.stringify(payload, null, 2)], {
+    const packet = await buildEvidencePacket(payload);
+
+    const blob = new Blob([JSON.stringify(packet, null, 2)], {
       type: "application/json",
     });
     const href = URL.createObjectURL(blob);
@@ -118,6 +127,7 @@ export function InvestigationWorkbench({
       model.investigation.id.toLowerCase() + "-evidence.json";
     anchor.click();
     URL.revokeObjectURL(href);
+    setExporting(false);
   };
 
   return (
@@ -197,8 +207,12 @@ export function InvestigationWorkbench({
           </div>
         </div>
 
-        <button className="primary-action" onClick={exportEvidence}>
-          Export evidence packet
+        <button
+          className="primary-action"
+          onClick={exportEvidence}
+          disabled={exporting}
+        >
+          {exporting ? "Hashing packet…" : "Export evidence packet"}
         </button>
       </aside>
 
