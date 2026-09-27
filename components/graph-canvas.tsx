@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
 import type { GraphEdge, GraphNode } from "@/lib/domain";
 
 const nodeClass: Record<GraphNode["kind"], string> = {
@@ -56,9 +56,9 @@ export function GraphCanvas({
       <div
         className="graph-stage graph-stage-v3"
         style={{
-          ["--graph-rx" as string]: tilt.y + "deg",
-          ["--graph-ry" as string]: tilt.x + "deg",
-        }}
+          "--graph-rx": tilt.y + "deg",
+          "--graph-ry": tilt.x + "deg",
+        } as CSSProperties}
         onPointerMove={(event) => {
           if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
           const rect = event.currentTarget.getBoundingClientRect();
