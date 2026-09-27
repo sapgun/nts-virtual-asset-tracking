@@ -1,12 +1,15 @@
 import Link from "next/link";
+import { CapabilityRegistry } from "@/components/capability-registry";
 import { StateBadge } from "@/components/state-badge";
 import { caseFiles, evidence, investigation } from "@/lib/mock-data";
 
 const modules = [
   ["Investigation Lab", "Trace flows, test hypotheses and preserve evidence states.", "/investigations", "01"],
-  ["Case Reconstruction", "Replay public cases as evidence-driven investigation sequences.", "/cases", "02"],
-  ["Evidence Room", "Separate direct facts, analytical inference and external attribution.", "/evidence", "03"],
-  ["Academy", "Learn blockchain investigation through interactive modules and cases.", "/academy", "04"],
+  ["Graph Explorer", "Load public Ethereum observations and promote them into a draft investigation.", "/explore", "02"],
+  ["Bridge Lab", "Compare deterministic message-key links against heuristic correlation.", "/bridges", "03"],
+  ["Case Reconstruction", "Replay public cases as evidence-driven investigation sequences.", "/cases", "04"],
+  ["Evidence Room", "Separate direct facts, analytical inference and external attribution.", "/evidence", "05"],
+  ["Academy", "Learn blockchain investigation through interactive modules and cases.", "/academy", "06"],
 ];
 
 export default function HomePage() {
@@ -95,6 +98,8 @@ export default function HomePage() {
           <div><StateBadge state="UNVERIFIED" /><span>Natural person</span></div>
         </div>
       </section>
+
+      <CapabilityRegistry />
     </div>
   );
 }
