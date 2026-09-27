@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { ActivityTimeline, type InvestigationActivity } from "@/components/activity-timeline";
 import { EvidencePanel } from "@/components/evidence-panel";
 import { GraphCanvas } from "@/components/graph-canvas";
-import { StateBadge } from "@/components/state-badge";
+import type { InvestigationActivity } from "@/components/activity-timeline";
 import type { GraphNode } from "@/lib/domain";
 import { buildEvidencePacket } from "@/lib/evidence-packet";
 import {
@@ -32,6 +31,7 @@ export function InvestigationWorkbench({
     useState<ImportedInvestigationModel | null>(null);
   const [importError, setImportError] = useState("");
   const [exporting, setExporting] = useState(false);
+  const [inspectorOpen, setInspectorOpen] = useState(true);
   const [activity, setActivity] = useState<InvestigationActivity[]>([]);
 
   function logActivity(item: Omit<InvestigationActivity, "id" | "timestamp">) {
@@ -114,14 +114,20 @@ export function InvestigationWorkbench({
 
   const selected =
     model.nodes.find((node) => node.id === selectedId) ?? model.nodes[0];
-  const maxStep = Math.max(
-    1,
-    ...model.edges.map((edge) => edge.step),
-  );
+  const maxStep = Math.max(1, ...model.edges.map((edge) => edge.step));
+
+  const moveStep = (next: number, title: string) => {
+    const value = Math.max(1, Math.min(maxStep, next));
+    setStep(value);
+    logActivity({
+      type: "STEP",
+      title,
+      detail: "Graph timeline moved to step " + value + ".",
+    });
+  };
 
   const exportEvidence = async () => {
     setExporting(true);
-
     try {
       const payload = {
         notice: importedMode
@@ -133,176 +139,145 @@ export function InvestigationWorkbench({
         selectedNode: selected,
         evidence: model.evidence,
         hypotheses: [model.hypothesis],
-        capture: {
-          step,
-          maxStep,
-        },
+        capture: { step, maxStep },
       };
 
       const packet = await buildEvidencePacket(payload);
-
       const blob = new Blob([JSON.stringify(packet, null, 2)], {
         type: "application/json",
       });
       const href = URL.createObjectURL(blob);
       const anchor = document.createElement("a");
       anchor.href = href;
-      anchor.download =
-        model.investigation.id.toLowerCase() + "-evidence.json";
+      anchor.download = model.investigation.id.toLowerCase() + "-evidence.json";
       anchor.click();
       URL.revokeObjectURL(href);
+
+      logActivity({
+        type: "EXPORT",
+        title: "Evidence packet exported",
+        detail: "Canonical SHA-256 integrity packet generated.",
+      });
     } finally {
       setExporting(false);
     }
   };
 
   return (
-    <div className="workbench">
-      <aside className="control-panel">
-        <div>
-          <span className="eyebrow">INVESTIGATION</span>
-          <h1>{model.investigation.id}</h1>
-          <p>{model.investigation.title}</p>
-          {importedMode && (
-            <span className="import-mode-badge">PUBLIC OBSERVATION MODE</span>
-          )}
+    <div className="investigation-screen">
+      <header className="case-commandbar">
+        <div className="case-identity">
+          <div className="case-orb"><i /></div>
+          <div>
+            <span className="eyebrow">LIVE INVESTIGATION</span>
+            <h1>{model.investigation.title}</h1>
+            <div className="case-meta-line">
+              <span>{model.investigation.id}</span>
+              <i />
+              <span>Ethereum</span>
+              <i />
+              <code>{model.investigation.seed}</code>
+            </div>
+          </div>
         </div>
 
-        <div className="control-group">
-          <label>Seed</label>
-          <div className="seed-box">{model.investigation.seed}</div>
-        </div>
-
-        <div className="control-group">
-          <label>Network</label>
-          <button className="select-button">
-            Ethereum <span>⌄</span>
+        <div className="case-command-actions">
+          <span className={importedMode ? "mode-pill public" : "mode-pill sandbox"}>
+            {importedMode ? "PUBLIC OBSERVATION" : "SANDBOX"}
+          </span>
+          <button
+            className="ghost-action"
+            onClick={() => setInspectorOpen((value) => !value)}
+          >
+            {inspectorOpen ? "Hide inspector" : "Open inspector"}
+          </button>
+          <button
+            className="export-action"
+            onClick={exportEvidence}
+            disabled={exporting}
+          >
+            {exporting ? "Hashing…" : "Export packet"}
           </button>
         </div>
+      </header>
 
-        <div className="control-group">
-          <label>Playback</label>
-          <div className="step-readout">
-            STEP {step} / {maxStep}
-          </div>
-          <input
-            aria-label="Investigation step"
-            type="range"
-            min="1"
-            max={maxStep}
-            value={Math.min(step, maxStep)}
-            onChange={(event) => {
-              const next = Number(event.target.value);
-              setStep(next);
+      <div className={inspectorOpen ? "investigation-stage inspector-open" : "investigation-stage"}>
+        <div className="graph-spotlight">
+          <GraphCanvas
+            nodes={model.nodes}
+            edges={model.edges}
+            step={step}
+            selectedId={selected.id}
+            onSelect={(node: GraphNode) => {
+              setSelectedId(node.id);
+              setInspectorOpen(true);
               logActivity({
-                type: "STEP",
-                title: "Playback moved",
-                detail: "Graph timeline moved to step " + next + ".",
+                type: "NODE_SELECT",
+                title: "Node selected",
+                detail: node.label + " · " + node.state,
+                state: node.state,
               });
             }}
           />
-          <div className="button-row">
-            <button
-              onClick={() => {
-                const next = Math.max(1, step - 1);
-                setStep(next);
-                logActivity({
-                  type: "STEP",
-                  title: "Playback moved",
-                  detail: "Graph timeline moved to step " + next + ".",
-                });
-              }}
-            >
-              Back
+
+          <div className="graph-context-card">
+            <span>SELECTED</span>
+            <strong>{selected.label}</strong>
+            <small>{selected.state} · {Math.round(selected.confidence * 100)}%</small>
+          </div>
+
+          <div className="playback-dock">
+            <button onClick={() => moveStep(step - 1, "Playback moved")} disabled={step <= 1}>
+              ←
             </button>
-            <button
-              onClick={() => {
-                const next = Math.min(maxStep, step + 1);
-                setStep(next);
-                logActivity({
-                  type: "STEP",
-                  title: "Next hop revealed",
-                  detail: "Graph timeline advanced to step " + next + ".",
-                });
-              }}
-            >
-              Next hop
+            <div className="playback-track">
+              <div>
+                <span>TRACE DEPTH</span>
+                <b>{String(step).padStart(2, "0")} / {String(maxStep).padStart(2, "0")}</b>
+              </div>
+              <input
+                aria-label="Investigation trace depth"
+                type="range"
+                min="1"
+                max={maxStep}
+                value={Math.min(step, maxStep)}
+                onChange={(event) => moveStep(Number(event.target.value), "Playback scrubbed")}
+              />
+            </div>
+            <button onClick={() => moveStep(step + 1, "Next hop revealed")} disabled={step >= maxStep}>
+              →
             </button>
           </div>
         </div>
 
-        <div className="control-group">
-          <label>Evidence rule</label>
-          <div className="rule-stack">
-            <div>
-              <StateBadge state="OBSERVED" />
-              <span>Direct chain fact</span>
-            </div>
-            <div>
-              <StateBadge state="INFERRED" />
-              <span>Analytical hypothesis</span>
-            </div>
-            <div>
-              <StateBadge state="ATTRIBUTED" />
-              <span>Entity-supported</span>
-            </div>
-            <div>
-              <StateBadge state="UNVERIFIED" />
-              <span>Requires corroboration</span>
-            </div>
-          </div>
-        </div>
-
-        <button
-          className="primary-action"
-          onClick={exportEvidence}
-          disabled={exporting}
-        >
-          {exporting ? "Hashing packet…" : "Export evidence packet"}
-        </button>
-      </aside>
-
-      <GraphCanvas
-        nodes={model.nodes}
-        edges={model.edges}
-        step={step}
-        selectedId={selected.id}
-        onSelect={(node: GraphNode) => {
-          setSelectedId(node.id);
-          logActivity({
-            type: "NODE_SELECT",
-            title: "Node selected",
-            detail: node.label + " · " + node.state,
-            state: node.state,
-          });
-        }}
-      />
-
-      <EvidencePanel
-        selected={selected}
-        evidence={model.evidence}
-        hypothesis={model.hypothesis}
-        onHypothesisCreate={({ hypothesis, createdAt }) => {
-          setActivity((current) => [
-            ...current,
-            {
-              id: crypto.randomUUID(),
-              type: "HYPOTHESIS",
-              title: "Hypothesis drafted",
-              detail:
-                hypothesis.claim +
-                " · " +
-                Math.round(hypothesis.confidence * 100) +
-                "% · " +
-                hypothesis.state,
-              timestamp: createdAt,
-              state: hypothesis.state,
-            },
-          ].slice(-40));
-        }}
-      />
-
-      <ActivityTimeline items={activity} />
+        {inspectorOpen && (
+          <EvidencePanel
+            selected={selected}
+            evidence={model.evidence}
+            hypothesis={model.hypothesis}
+            activity={activity}
+            onClose={() => setInspectorOpen(false)}
+            onHypothesisCreate={({ hypothesis, createdAt }) => {
+              setActivity((current) => [
+                ...current,
+                {
+                  id: crypto.randomUUID(),
+                  type: "HYPOTHESIS",
+                  title: "Hypothesis drafted",
+                  detail:
+                    hypothesis.claim +
+                    " · " +
+                    Math.round(hypothesis.confidence * 100) +
+                    "% · " +
+                    hypothesis.state,
+                  timestamp: createdAt,
+                  state: hypothesis.state,
+                },
+              ].slice(-40));
+            }}
+          />
+        )}
+      </div>
     </div>
   );
 }
