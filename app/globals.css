@@ -1858,3 +1858,203 @@ button { color: inherit; }
     grid-column: auto;
   }
 }
+
+
+/* === PUBLIC ADDRESS EXPLORER === */
+.public-explorer {
+  display: grid;
+  gap: 14px;
+}
+
+.address-search {
+  display: grid;
+  gap: 14px;
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 17px;
+  background:
+    radial-gradient(520px circle at 90% 0%, rgba(73, 147, 255, .07), transparent 68%),
+    rgba(12, 17, 24, .78);
+}
+
+.address-search h2 {
+  margin: 7px 0 0;
+  font-size: 24px;
+  letter-spacing: -.04em;
+}
+
+.address-search-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.address-search-row input {
+  min-height: 46px;
+  width: 100%;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  outline: 0;
+  color: #e9f3f9;
+  background: rgba(255,255,255,.025);
+  font: 650 12px ui-monospace, monospace;
+}
+
+.address-search-row input:focus {
+  border-color: rgba(102, 203, 255, .42);
+  box-shadow: 0 0 0 3px rgba(85, 181, 239, .05);
+}
+
+.address-search-row button {
+  min-height: 46px;
+  padding: 0 15px;
+  border: 1px solid rgba(105, 207, 255, .18);
+  border-radius: 11px;
+  color: #caf1ff;
+  background: rgba(75, 159, 224, .075);
+  cursor: pointer;
+}
+
+.address-search-row button:disabled {
+  opacity: .55;
+  cursor: default;
+}
+
+.address-search > p {
+  margin: 0;
+  color: #69798d;
+  font-size: 10.5px;
+  line-height: 1.5;
+}
+
+.explorer-message {
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  color: #91a0b0;
+  background: rgba(255,255,255,.018);
+  font-size: 11px;
+}
+
+.explorer-message.error {
+  border-color: rgba(255, 136, 126, .15);
+  color: #d69a94;
+  background: rgba(111, 45, 39, .08);
+}
+
+.transaction-results {
+  border: 1px solid var(--line);
+  border-radius: 17px;
+  overflow: hidden;
+  background: rgba(10, 15, 22, .8);
+}
+
+.results-head {
+  min-height: 78px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+  padding: 15px 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.results-head strong {
+  display: block;
+  margin-top: 5px;
+  font-size: 12px;
+}
+
+.tx-list {
+  display: grid;
+}
+
+.tx-list article {
+  display: grid;
+  grid-template-columns: minmax(145px, 1.2fr) repeat(5, minmax(90px, 1fr));
+  gap: 12px;
+  align-items: center;
+  min-height: 72px;
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.tx-list article:last-child {
+  border-bottom: 0;
+}
+
+.tx-list article:hover {
+  background: rgba(78, 153, 215, .035);
+}
+
+.tx-list div {
+  min-width: 0;
+}
+
+.tx-list small {
+  display: block;
+  margin-bottom: 5px;
+  color: #536376;
+  font: 760 7.5px ui-monospace, monospace;
+  letter-spacing: .08em;
+}
+
+.tx-list span,
+.tx-list b {
+  display: block;
+  overflow: hidden;
+  color: #97a5b5;
+  font: 600 9.5px ui-monospace, monospace;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tx-list b {
+  color: #d6e7f2;
+}
+
+.tx-primary span {
+  margin-top: 5px;
+  color: #647589;
+  font-size: 8.5px;
+}
+
+.provenance-note {
+  margin: 0;
+  padding: 13px 17px;
+  border-top: 1px solid var(--line);
+  color: #596a7e;
+  font-size: 9.5px;
+}
+
+.provenance-note a {
+  color: #80d9ff;
+}
+
+@media (max-width: 1100px) {
+  .tx-list article {
+    grid-template-columns: minmax(150px, 1.3fr) repeat(3, 1fr);
+  }
+  .tx-list article > div:nth-child(5),
+  .tx-list article > div:nth-child(6) {
+    display: none;
+  }
+}
+
+@media (max-width: 700px) {
+  .address-search-row {
+    grid-template-columns: 1fr;
+  }
+  .tx-list article {
+    grid-template-columns: 1fr 1fr;
+    gap: 9px;
+    padding: 13px;
+  }
+  .tx-primary {
+    grid-column: 1 / -1;
+  }
+  .tx-list article > div:nth-child(4) {
+    display: none;
+  }
+}
