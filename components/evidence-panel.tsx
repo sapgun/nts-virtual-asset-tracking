@@ -1,4 +1,5 @@
 import { EvidenceQualityCard } from "@/components/evidence-quality-card";
+import { HypothesisBuilder, type HypothesisDraftEvent } from "@/components/hypothesis-builder";
 import { InvestigatorCopilot } from "@/components/investigator-copilot";
 import { StateBadge } from "@/components/state-badge";
 import type { EvidenceItem, GraphNode, Hypothesis } from "@/lib/domain";
@@ -7,10 +8,12 @@ export function EvidencePanel({
   selected,
   evidence,
   hypothesis,
+  onHypothesisCreate,
 }: {
   selected: GraphNode;
   evidence: EvidenceItem[];
   hypothesis: Hypothesis;
+  onHypothesisCreate?: (event: HypothesisDraftEvent) => void;
 }) {
   return (
     <aside className="intel-panel">
@@ -40,6 +43,13 @@ export function EvidencePanel({
           <span>Hypothesis confidence</span>
           <b>{Math.round(hypothesis.confidence * 100)}%</b>
         </div>
+      </div>
+
+      <div className="intel-block">
+        <HypothesisBuilder
+          evidence={evidence}
+          onCreate={onHypothesisCreate}
+        />
       </div>
 
       <div className="intel-block">
