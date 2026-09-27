@@ -2608,3 +2608,134 @@ button { color: inherit; }
     animation: none !important;
   }
 }
+
+
+/* === EVIDENCE QUALITY === */
+.quality-card {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 18px;
+  padding: 20px;
+  border: 1px solid rgba(103, 207, 255, .14);
+  border-radius: 16px;
+  background:
+    radial-gradient(420px circle at 100% 0%, rgba(80, 142, 255, .07), transparent 68%),
+    rgba(12, 17, 24, .78);
+}
+
+.quality-card.compact {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.quality-head {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 18px;
+  align-items: end;
+}
+
+.quality-head > div {
+  white-space: nowrap;
+}
+
+.quality-head strong {
+  display: inline-block;
+  margin-top: 6px;
+  color: #e7f6ff;
+  font: 850 34px ui-monospace, monospace;
+  letter-spacing: -.06em;
+}
+
+.quality-card.compact .quality-head strong {
+  font-size: 28px;
+}
+
+.quality-head small {
+  margin-left: 4px;
+  color: #68798c;
+  font: 700 9px ui-monospace, monospace;
+}
+
+.quality-head p {
+  margin: 0;
+  color: #8997a8;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.quality-metrics {
+  display: grid;
+  gap: 9px;
+}
+
+.quality-metrics > div {
+  display: grid;
+  gap: 5px;
+}
+
+.quality-metrics span {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: #69798c;
+  font-size: 9px;
+}
+
+.quality-metrics span b {
+  color: #a9bfd0;
+  font: 750 9px ui-monospace, monospace;
+}
+
+.quality-metrics i {
+  height: 5px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(137, 165, 195, .09);
+}
+
+.quality-metrics em {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #62d2ff, #738fff 58%, #a28cff);
+  box-shadow: 0 0 14px rgba(97, 198, 255, .18);
+}
+
+.quality-gap {
+  min-height: 36px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  padding: 0 10px;
+  border: 1px solid rgba(255, 189, 93, .09);
+  border-radius: 9px;
+  background: rgba(74, 48, 15, .06);
+  color: #788698;
+  font-size: 9px;
+}
+
+.quality-gap b {
+  color: #ffc879;
+  font: 800 9px ui-monospace, monospace;
+}
+
+.quality-note {
+  margin: 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  color: #657488;
+  font-size: 9.5px;
+  line-height: 1.5;
+}
+
+@media (max-width: 620px) {
+  .quality-head {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+}
