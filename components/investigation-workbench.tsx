@@ -99,35 +99,38 @@ export function InvestigationWorkbench({
   const exportEvidence = async () => {
     setExporting(true);
 
-    const payload = {
-      notice: importedMode
-        ? "Public-chain observation packet — no ownership or natural-person attribution."
-        : "Synthetic training data — not investigative evidence",
-      mode: importedMode ? "PUBLIC_IMPORT" : "SYNTHETIC_SANDBOX",
-      investigation: model.investigation,
-      visibleEdges: model.edges.filter((edge) => edge.step <= step),
-      selectedNode: selected,
-      evidence: model.evidence,
-      hypotheses: [model.hypothesis],
-      capture: {
-        step,
-        maxStep,
-      },
-    };
+    try {
+      const payload = {
+        notice: importedMode
+          ? "Public-chain observation packet — no ownership or natural-person attribution."
+          : "Synthetic training data — not investigative evidence",
+        mode: importedMode ? "PUBLIC_IMPORT" : "SYNTHETIC_SANDBOX",
+        investigation: model.investigation,
+        visibleEdges: model.edges.filter((edge) => edge.step <= step),
+        selectedNode: selected,
+        evidence: model.evidence,
+        hypotheses: [model.hypothesis],
+        capture: {
+          step,
+          maxStep,
+        },
+      };
 
-    const packet = await buildEvidencePacket(payload);
+      const packet = await buildEvidencePacket(payload);
 
-    const blob = new Blob([JSON.stringify(packet, null, 2)], {
-      type: "application/json",
-    });
-    const href = URL.createObjectURL(blob);
-    const anchor = document.createElement("a");
-    anchor.href = href;
-    anchor.download =
-      model.investigation.id.toLowerCase() + "-evidence.json";
-    anchor.click();
-    URL.revokeObjectURL(href);
-    setExporting(false);
+      const blob = new Blob([JSON.stringify(packet, null, 2)], {
+        type: "application/json",
+      });
+      const href = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = href;
+      anchor.download =
+        model.investigation.id.toLowerCase() + "-evidence.json";
+      anchor.click();
+      URL.revokeObjectURL(href);
+    } finally {
+      setExporting(false);
+    }
   };
 
   return (
