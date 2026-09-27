@@ -2058,3 +2058,125 @@ button { color: inherit; }
     display: none;
   }
 }
+
+
+/* === INVESTIGATOR COPILOT === */
+.copilot {
+  display: grid;
+  gap: 12px;
+}
+
+.copilot-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.copilot-head small {
+  display: block;
+  margin-top: 4px;
+  color: #596a7c;
+  font-size: 8.5px;
+}
+
+.copilot-status {
+  min-height: 21px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 7px;
+  border: 1px solid rgba(104, 239, 205, .14);
+  border-radius: 999px;
+  color: #7eeed1;
+  background: rgba(69, 200, 164, .045);
+  font: 800 8px ui-monospace, monospace;
+  letter-spacing: .08em;
+}
+
+.copilot-prompts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.copilot-prompts button {
+  min-height: 39px;
+  padding: 7px 8px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  color: #9cabbc;
+  background: rgba(255,255,255,.018);
+  font-size: 9px;
+  text-align: left;
+  cursor: pointer;
+  transition: .2s ease;
+}
+
+.copilot-prompts button:hover {
+  border-color: rgba(105, 207, 255, .24);
+  color: #d7edf9;
+  background: rgba(68, 152, 217, .055);
+}
+
+.copilot-prompts button:disabled {
+  opacity: .55;
+  cursor: default;
+}
+
+.copilot-response {
+  padding: 12px;
+  border: 1px solid rgba(109, 202, 255, .12);
+  border-radius: 10px;
+  background:
+    radial-gradient(280px circle at 100% 0%, rgba(86, 111, 255, .055), transparent 70%),
+    rgba(65, 150, 215, .035);
+}
+
+.copilot-response > p {
+  margin: 0;
+  color: #aab7c5;
+  font-size: 10.5px;
+  line-height: 1.58;
+}
+
+.copilot-refs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.copilot-refs span {
+  margin-right: 2px;
+  color: #5e6e81;
+  font: 750 8px ui-monospace, monospace;
+}
+
+.copilot-refs b {
+  padding: 4px 6px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: #7ccfff;
+  font: 750 8px ui-monospace, monospace;
+}
+
+.copilot-caution {
+  display: grid;
+  gap: 4px;
+  margin-top: 10px;
+  padding-top: 9px;
+  border-top: 1px solid var(--line);
+}
+
+.copilot-caution span {
+  color: #6e7e90;
+  font-size: 8.5px;
+  line-height: 1.4;
+}
+
+.copilot-error {
+  margin: 0;
+  color: #e19a94;
+  font-size: 9px;
+}
