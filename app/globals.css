@@ -1198,6 +1198,34 @@ button { color: inherit; }
   font-size: 11px;
 }
 
+.research-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.research-lang-toggle {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.research-lang-toggle button {
+  padding: 6px 12px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.research-lang-toggle button[aria-pressed="true"] {
+  background: var(--blue);
+  color: #fff;
+}
+
 .research-frame {
   width: 100%;
   height: 100%;
