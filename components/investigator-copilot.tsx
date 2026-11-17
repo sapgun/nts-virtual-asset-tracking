@@ -10,12 +10,13 @@ import type {
   InvestigatorQuestion,
   InvestigatorResponse,
 } from "@/lib/adapters/investigator-adapter";
+import { useLanguage } from "@/lib/i18n/provider";
 
 const prompts: Array<[InvestigatorQuestion, string]> = [
-  ["EXPLAIN_NODE", "Explain this node"],
-  ["EXPLAIN_CONFIDENCE", "Why this confidence?"],
-  ["MISSING_EVIDENCE", "What evidence is missing?"],
-  ["NEXT_STEP", "What should I inspect next?"],
+  ["EXPLAIN_NODE", "evidence.copilot.promptExplainNode"],
+  ["EXPLAIN_CONFIDENCE", "evidence.copilot.promptConfidence"],
+  ["MISSING_EVIDENCE", "evidence.copilot.promptMissing"],
+  ["NEXT_STEP", "evidence.copilot.promptNext"],
 ];
 
 export function InvestigatorCopilot({
@@ -27,6 +28,7 @@ export function InvestigatorCopilot({
   hypothesis: Hypothesis;
   evidence: EvidenceItem[];
 }) {
+  const { locale, t, tc } = useLanguage();
   const [response, setResponse] =
     useState<InvestigatorResponse | null>(null);
   const [loading, setLoading] =
@@ -38,6 +40,25 @@ export function InvestigatorCopilot({
     setError("");
 
     try {
+      // Localize the context before sending: the rule-based adapter
+      // interpolates node / hypothesis / evidence text into its answer.
+      const localizedNode: GraphNode = {
+        ...node,
+        label: tc(node.label),
+        description: tc(node.description),
+      };
+      const localizedHypothesis: Hypothesis = {
+        ...hypothesis,
+        claim: tc(hypothesis.claim),
+        method: tc(hypothesis.method),
+        counterEvidence: hypothesis.counterEvidence.map((item) => tc(item)),
+      };
+      const localizedEvidence: EvidenceItem[] = evidence.map((item) => ({
+        ...item,
+        title: tc(item.title),
+        detail: tc(item.detail),
+      }));
+
       const result = await fetch("/api/investigator/ask", {
         method: "POST",
         headers: {
@@ -45,10 +66,11 @@ export function InvestigatorCopilot({
         },
         body: JSON.stringify({
           question,
+          lang: locale,
           context: {
-            node,
-            hypothesis,
-            evidence,
+            node: localizedNode,
+            hypothesis: localizedHypothesis,
+            evidence: localizedEvidence,
           },
         }),
       });
@@ -57,7 +79,7 @@ export function InvestigatorCopilot({
 
       if (!result.ok) {
         throw new Error(
-          payload?.error || "Investigator request failed",
+          payload?.error || t("evidence.copilot.requestFailed"),
         );
       }
 
@@ -65,7 +87,7 @@ export function InvestigatorCopilot({
     } catch (caught) {
       setResponse(null);
       setError(
-        caught instanceof Error ? caught.message : "Request failed",
+        caught instanceof Error ? caught.message : t("evidence.copilot.genericFailed"),
       );
     } finally {
       setLoading(null);
@@ -76,20 +98,20 @@ export function InvestigatorCopilot({
     <div className="copilot">
       <div className="copilot-head">
         <div>
-          <span className="eyebrow">INVESTIGATOR COPILOT</span>
-          <small>Deterministic cited-context MVP · no external model</small>
+          <span className="eyebrow">{t("evidence.copilot.eyebrow")}</span>
+          <small>{t("evidence.copilot.subtitle")}</small>
         </div>
-        <span className="copilot-status">LOCAL</span>
+        <span className="copilot-status">{t("evidence.copilot.status")}</span>
       </div>
 
       <div className="copilot-prompts">
-        {prompts.map(([question, label]) => (
+        {prompts.map(([question, labelKey]) => (
           <button
             key={question}
             onClick={() => ask(question)}
             disabled={loading !== null}
           >
-            {loading === question ? "Analyzing…" : label}
+            {loading === question ? t("evidence.copilot.analyzing") : t(labelKey)}
           </button>
         ))}
       </div>
@@ -102,7 +124,7 @@ export function InvestigatorCopilot({
 
           {response.citations.length > 0 && (
             <div className="copilot-citations">
-              <span>CITED CONTEXT</span>
+              <span>{t("evidence.copilot.citedContext")}</span>
               {response.citations.map((citation) => (
                 <div key={citation.evidenceId}>
                   <b>{citation.evidenceId}</b>
@@ -113,7 +135,7 @@ export function InvestigatorCopilot({
                       target="_blank"
                       rel="noreferrer"
                     >
-                      source ↗
+                      {t("evidence.copilot.sourceLink")} ↗
                     </a>
                   )}
                 </div>

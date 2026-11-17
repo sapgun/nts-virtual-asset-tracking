@@ -1,4 +1,7 @@
+"use client";
+
 import type { EvidenceState } from "@/lib/domain";
+import { useLanguage } from "@/lib/i18n/provider";
 
 export interface InvestigationActivity {
   id: string;
@@ -19,16 +22,17 @@ export function ActivityTimeline({
 }: {
   items: InvestigationActivity[];
 }) {
+  const { locale, t } = useLanguage();
   return (
     <section className="activity-timeline">
       <div className="activity-head">
-        <span className="eyebrow">ACTIVITY TIMELINE</span>
-        <small>{items.length} events</small>
+        <span className="eyebrow">{t("evidence.activity.eyebrow")}</span>
+        <small>{t("evidence.activity.events", { count: items.length })}</small>
       </div>
 
       <div className="activity-list">
         {items.length === 0 ? (
-          <p>No activity recorded in this session.</p>
+          <p>{t("evidence.activity.empty")}</p>
         ) : (
           items
             .slice()
@@ -41,7 +45,7 @@ export function ActivityTimeline({
                   <strong>{item.title}</strong>
                   <p>{item.detail}</p>
                   <small>
-                    {new Date(item.timestamp).toLocaleTimeString()}
+                    {new Date(item.timestamp).toLocaleTimeString(locale === "ko" ? "ko-KR" : "en-US")}
                   </small>
                 </div>
               </article>

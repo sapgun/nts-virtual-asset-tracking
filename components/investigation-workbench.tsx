@@ -12,8 +12,10 @@ import { TopologyCanvas } from "@/components/workspace/topology-canvas";
 import { Inspector } from "@/components/workspace/inspector";
 import { Icon } from "@/components/workspace/icons";
 import s from "@/components/workspace/workspace.module.css";
+import { useLanguage } from "@/lib/i18n/provider";
 
 export function InvestigationWorkbench({ importedMode = false }: { importedMode?: boolean }) {
+  const { locale, t, tc } = useLanguage();
   const [imported, setImported] = useState<ImportedInvestigationModel | null>(null);
   const [loadError, setLoadError] = useState("");
   const [step, setStep] = useState(4);
@@ -36,19 +38,19 @@ export function InvestigationWorkbench({ importedMode = false }: { importedMode?
     if (!importedMode) { setSelectedId("seed"); setStep(4); return; }
     try {
       const raw = sessionStorage.getItem(PUBLIC_IMPORT_STORAGE_KEY);
-      if (!raw) throw new Error("No imported observation is available in this browser tab. Start from Explorer.");
+      if (!raw) throw new Error(t("investigate.errorNoImport"));
       const value: unknown = JSON.parse(raw);
-      if (!value || typeof value !== "object") throw new Error("Invalid imported observation.");
+      if (!value || typeof value !== "object") throw new Error(t("investigate.errorInvalidImport"));
       const candidate = value as Partial<ImportedInvestigationDraft>;
       if (typeof candidate.seed !== "string" || !/^0x[a-fA-F0-9]{40}$/.test(candidate.seed) || !Array.isArray(candidate.transactions) || candidate.chain !== "ethereum") {
-        throw new Error("The imported draft does not contain a valid Ethereum observation.");
+        throw new Error(t("investigate.errorInvalidDraft"));
       }
-      const model = buildImportedInvestigation(candidate as ImportedInvestigationDraft);
+      const model = buildImportedInvestigation(candidate as ImportedInvestigationDraft, locale);
       setImported(model); setSelectedId(model.nodes[0]?.id ?? "");
       setStep(Math.max(1, ...model.edges.map((edge) => edge.step)));
-      log("IMPORT", "Public observation opened", "Session-scoped dataset. No identity attribution was added.");
-    } catch (error) { setLoadError(error instanceof Error ? error.message : "Unable to load this observation."); }
-  }, [importedMode, log]);
+      log("IMPORT", t("investigate.logImportTitle"), t("investigate.logImportDetail"));
+    } catch (error) { setLoadError(error instanceof Error ? error.message : t("investigate.errorLoadObservation")); }
+  }, [importedMode, locale, log, t]);
   const model = useMemo(() => importedMode ? imported : ({ investigation, nodes: graphNodes, edges: graphEdges, evidence, hypothesis: hypotheses[0] }), [importedMode, imported]);
   const maxStep = Math.max(1, ...(model?.edges.map((edge) => edge.step) ?? []));
   const currentStep = Math.min(step, maxStep);
@@ -74,57 +76,57 @@ export function InvestigationWorkbench({ importedMode = false }: { importedMode?
     setExporting(true);
     try {
       const packet = await buildEvidencePacket({
-        notice: importedMode ? "Public explorer observations. Not an identity attribution or legal certification." : "Synthetic training data. Not real investigative evidence.",
+        notice: importedMode ? t("investigate.packetNoticePublic") : t("investigate.packetNoticeSynthetic"),
         mode: importedMode ? "PUBLIC_IMPORT" : "SYNTHETIC_SANDBOX",
         investigation: model.investigation,
         nodes: model.nodes, edges: model.edges, visibleEdges: visible.edges,
         selectedNode: selected, evidence: model.evidence,
         hypotheses: [...drafts, model.hypothesis], activity,
         capture: { step: currentStep, maxStep },
-      });
+      }, locale);
       const url = URL.createObjectURL(new Blob([JSON.stringify(packet, null, 2)], { type: "application/json" }));
       const anchor = document.createElement("a"); anchor.href = url; anchor.download = `${model.investigation.id.toLowerCase()}-evidence.json`;
       document.body.appendChild(anchor); anchor.click(); anchor.remove();
       window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-      log("EXPORT", "Evidence packet exported", "Graph, hypotheses and session activity included. SHA-256 checksum; not a digital signature.");
-      setNotice("Evidence packet exported. The checksum is not a digital signature.");
-    } catch (error) { setNotice(error instanceof Error ? error.message : "Export failed. Please retry."); }
+      log("EXPORT", t("investigate.logExportTitle"), t("investigate.logExportDetail"));
+      setNotice(t("investigate.noticeExported"));
+    } catch (error) { setNotice(error instanceof Error ? error.message : t("investigate.noticeExportFailed")); }
     finally { setExporting(false); }
   }
-  function selectNode(node: GraphNode) { setSelectedId(node.id); setInspectorOpen(true); log("NODE_SELECT", "Node inspected", `${node.label} · ${node.state}`); }
-  function moveStep(value: number) { setPlaying(false); setStep(Math.max(1, Math.min(maxStep, value))); log("STEP", "Playback moved", `Step ${value} of ${maxStep}`); }
-  function play() { if (playing) { setPlaying(false); return; } if (currentStep >= maxStep) setStep(1); setPlaying(true); log("STEP", "Playback started", "User-controlled reconstruction, not live chain streaming."); }
+  function selectNode(node: GraphNode) { setSelectedId(node.id); setInspectorOpen(true); log("NODE_SELECT", t("investigate.logNodeTitle"), `${tc(node.label)} · ${node.state}`); }
+  function moveStep(value: number) { setPlaying(false); setStep(Math.max(1, Math.min(maxStep, value))); log("STEP", t("investigate.logStepTitle"), t("investigate.logStepDetail", { value, max: maxStep })); }
+  function play() { if (playing) { setPlaying(false); return; } if (currentStep >= maxStep) setStep(1); setPlaying(true); log("STEP", t("investigate.logPlayTitle"), t("investigate.logPlayDetail")); }
   async function fullscreen() {
     try { if (document.fullscreenElement) await document.exitFullscreen(); else await frame.current?.requestFullscreen(); }
-    catch { setNotice("Fullscreen is unavailable in this browser. The graph can still be panned and zoomed."); }
+    catch { setNotice(t("investigate.noticeFullscreen")); }
   }
-  if (!model || !selected || !activeHypothesis) return <div className={s.loading} role="status"><Icon name="target" /><h1>{loadError ? "Observation unavailable" : "Loading observation…"}</h1>
-    <p>{loadError || "Preparing the graph without adding identity claims."}</p><Link href="/explore">Open Explorer ↗</Link></div>;
+  if (!model || !selected || !activeHypothesis) return <div className={s.loading} role="status"><Icon name="target" /><h1>{loadError ? t("investigate.unavailableTitle") : t("investigate.loadingTitle")}</h1>
+    <p>{loadError || t("investigate.loadingBody")}</p><Link href="/explore">{t("investigate.openExplorer")} ↗</Link></div>;
   return <div ref={frame} className={s.screen}>
     <header className={s.caseBar}>
-      <Link href="/cases" className={s.backButton}><Icon name="arrow" width={16} height={16} />Back to cases</Link>
-      <div className={s.caseTitle}><span className={s.caseIcon}><Icon name="case" /></span><div><h1>{model.investigation.title}</h1><p>{model.investigation.id} · {importedMode ? "Public snapshot" : "Synthetic demo"}</p></div></div>
-      <div className={s.caseField}><span>Seed address</span><strong title={model.investigation.seed}>{model.investigation.seed.length > 24 ? `${model.investigation.seed.slice(0, 9)}…${model.investigation.seed.slice(-6)}` : model.investigation.seed}</strong></div>
-      <div className={s.caseField}><span>Network</span><strong><Icon name="eth" width={17} height={17} />Ethereum</strong></div>
-      <div className={s.caseField}><span>Mode</span><b className={s.mode} data-synthetic={!importedMode}>{importedMode ? "PUBLIC OBSERVATION" : "SYNTHETIC TRAINING"}</b></div>
-      <div className={s.caseActions}><button className={s.quietButton} aria-expanded={inspectorOpen} onClick={() => setInspectorOpen((value) => !value)}>{inspectorOpen ? "Hide details" : "Inspector"}</button>
-        <button className={s.exportButton} onClick={exportPacket} disabled={exporting} aria-label="Export evidence packet"><Icon name="export" width={17} height={17} /><span>{exporting ? "Exporting…" : "Export"}</span></button></div>
+      <Link href="/cases" className={s.backButton}><Icon name="arrow" width={16} height={16} />{t("investigate.backToCases")}</Link>
+      <div className={s.caseTitle}><span className={s.caseIcon}><Icon name="case" /></span><div><h1>{tc(model.investigation.title)}</h1><p>{model.investigation.id} · {importedMode ? t("investigate.publicObservation") : t("investigate.syntheticDemo")}</p></div></div>
+      <div className={s.caseField}><span>{t("investigate.seedAddress")}</span><strong title={model.investigation.seed}>{model.investigation.seed.length > 24 ? `${model.investigation.seed.slice(0, 9)}…${model.investigation.seed.slice(-6)}` : model.investigation.seed}</strong></div>
+      <div className={s.caseField}><span>{t("investigate.network")}</span><strong><Icon name="eth" width={17} height={17} />Ethereum</strong></div>
+      <div className={s.caseField}><span>{t("investigate.mode")}</span><b className={s.mode} data-synthetic={!importedMode}>{importedMode ? t("investigate.publicMode") : t("investigate.syntheticMode")}</b></div>
+      <div className={s.caseActions}><button className={s.quietButton} aria-expanded={inspectorOpen} onClick={() => setInspectorOpen((value) => !value)}>{inspectorOpen ? t("investigate.hideDetails") : t("investigate.inspector")}</button>
+        <button className={s.exportButton} onClick={exportPacket} disabled={exporting} aria-label={t("investigate.exportAria")}><Icon name="export" width={17} height={17} /><span>{exporting ? t("investigate.exporting") : t("investigate.export")}</span></button></div>
     </header>
     <div className={s.workarea} data-open={inspectorOpen}>
-      <section className={s.graphFrame} aria-label={importedMode ? "Imported public observation" : "Synthetic training graph"}>
+      <section className={s.graphFrame} aria-label={importedMode ? t("investigate.graphAriaPublic") : t("investigate.graphAriaSynthetic")}>
         <TopologyCanvas nodes={visible.nodes} allNodes={model.nodes} edges={visible.edges} seedId={seedId} selectedId={selected.id} onSelect={selectNode} />
-        <div className={s.playback} role="group" aria-label="Investigation playback">
-          <button aria-label="Previous step" onClick={() => moveStep(currentStep - 1)} disabled={currentStep <= 1}><Icon name="previous" width={17} height={17} /></button>
-          <button className={s.playButton} aria-label={playing ? "Pause playback" : "Play reconstruction"} aria-pressed={playing} onClick={play} disabled={maxStep <= 1}><Icon name={playing ? "pause" : "play"} width={21} height={21} /></button>
-          <button aria-label="Next step" onClick={() => moveStep(currentStep + 1)} disabled={currentStep >= maxStep}><Icon name="next" width={17} height={17} /></button>
-          <label><span>Trace playback <b>{currentStep} / {maxStep}</b></span><input aria-label="Playback step" type="range" min="1" max={maxStep} value={currentStep} onChange={(event) => moveStep(Number(event.target.value))} /></label>
-          <div className={s.playbackMeta}><Icon name="clock" width={15} height={15} />{importedMode ? "Imported snapshot" : "Training snapshot"}</div>
-          <button aria-label="Toggle fullscreen" onClick={fullscreen}><Icon name="fit" width={17} height={17} /></button>
+        <div className={s.playback} role="group" aria-label={t("investigate.playbackLabel")}>
+          <button aria-label={t("investigate.prevStepAria")} onClick={() => moveStep(currentStep - 1)} disabled={currentStep <= 1}><Icon name="previous" width={17} height={17} /></button>
+          <button className={s.playButton} aria-label={playing ? t("investigate.pauseAria") : t("investigate.playAria")} aria-pressed={playing} onClick={play} disabled={maxStep <= 1}><Icon name={playing ? "pause" : "play"} width={21} height={21} /></button>
+          <button aria-label={t("investigate.nextStepAria")} onClick={() => moveStep(currentStep + 1)} disabled={currentStep >= maxStep}><Icon name="next" width={17} height={17} /></button>
+          <label><span>{t("investigate.playbackLabel")} <b>{currentStep} / {maxStep}</b></span><input aria-label={t("investigate.playbackLabel")} type="range" min="1" max={maxStep} value={currentStep} onChange={(event) => moveStep(Number(event.target.value))} /></label>
+          <div className={s.playbackMeta}><Icon name="clock" width={15} height={15} />{importedMode ? t("investigate.importedSnapshot") : t("investigate.trainingSnapshot")}</div>
+          <button aria-label={t("investigate.fullscreenAria")} onClick={fullscreen}><Icon name="fit" width={17} height={17} /></button>
         </div>
       </section>
-      {inspectorOpen && <button className={s.scrim} tabIndex={-1} aria-label="Dismiss inspector" onClick={closeInspector} />}
+      {inspectorOpen && <button className={s.scrim} tabIndex={-1} aria-label={t("inspector.closeAria")} onClick={closeInspector} />}
       <Inspector open={inspectorOpen} selected={selected} edges={visible.edges} evidence={model.evidence} hypothesis={activeHypothesis} activity={activity} synthetic={!importedMode} onClose={closeInspector}
-        onHypothesisCreate={({ hypothesis }) => { setDrafts((items) => [hypothesis, ...items]); log("HYPOTHESIS", "Analyst draft created", hypothesis.claim); setNotice("Hypothesis added to this session and the next export."); }} />
+        onHypothesisCreate={({ hypothesis }) => { setDrafts((items) => [hypothesis, ...items]); log("HYPOTHESIS", t("investigate.logHypothesisTitle"), hypothesis.claim); setNotice(t("investigate.noticeHypothesis")); }} />
     </div>
     {notice && <div className={s.notice} role="status">{notice}</div>}
   </div>;

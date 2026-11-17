@@ -1,32 +1,29 @@
-import { AcademyChallenge } from "@/components/academy-challenge";
+"use client";
 
-const tracks = [
-  ["Foundation", "Facts, provenance and evidence states"],
-  ["Tracing", "UTXO, EVM and flow reconstruction"],
-  ["Privacy", "Mixers, privacy systems and uncertainty"],
-  ["Cross-chain", "Bridge events and correlation"],
-];
+import { AcademyChallenge } from "@/components/academy-challenge";
+import { useLanguage } from "@/lib/i18n/provider";
+
+const trackKeys = ["foundation", "tracing", "privacy", "crosschain"] as const;
 
 export default function AcademyPage() {
+  const { t } = useLanguage();
   return (
     <div className="content-page academy-page-v3">
       <header className="page-header academy-header-v3">
-        <span className="eyebrow">ACADEMY</span>
-        <h1>Learn the boundary, not just the tool.</h1>
-        <p>
-          One short field exercise at a time. The same evidence model used in the workbench is used here.
-        </p>
+        <span className="eyebrow">{t("academy.eyebrow")}</span>
+        <h1>{t("academy.title")}</h1>
+        <p>{t("academy.intro")}</p>
       </header>
 
       <AcademyChallenge />
 
       <section className="academy-track-strip">
-        {tracks.map(([title, body], index) => (
-          <article key={title}>
+        {trackKeys.map((key, index) => (
+          <article key={key}>
             <span>{String(index + 1).padStart(2, "0")}</span>
             <div>
-              <strong>{title}</strong>
-              <p>{body}</p>
+              <strong>{t(`academy.tracks.${key}.title`)}</strong>
+              <p>{t(`academy.tracks.${key}.body`)}</p>
             </div>
           </article>
         ))}

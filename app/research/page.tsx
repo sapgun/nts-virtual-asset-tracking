@@ -1,48 +1,60 @@
 "use client";
 
-import { useState } from "react";
+import { useRef } from "react";
+import { useLanguage } from "@/lib/i18n/provider";
 
-type ReportLang = "ko" | "en";
-
-const reportFiles: Record<ReportLang, string> = {
+const reportFiles = {
   ko: "/research-legacy.html",
   en: "/research-legacy-en.html",
-};
+} as const;
 
 export default function ResearchPage() {
-  const [lang, setLang] = useState<ReportLang>("ko");
-  const src = reportFiles[lang];
+  const { locale, setLocale, t } = useLanguage();
+  const frame = useRef<HTMLIFrameElement>(null);
+  const src = reportFiles[locale];
+
+  // The report's own masthead toggle navigates the iframe (location.href).
+  // Same-origin, so the parent can read the new file name on load and
+  // follow the report's language instead of fighting it.
+  function syncFromFrame() {
+    const path = frame.current?.contentWindow?.location.pathname ?? "";
+    const next = path.endsWith("-en.html") ? "en" : "ko";
+    if (next !== locale) setLocale(next);
+  }
+
   return (
     <div className="research-frame-page">
       <header className="research-bar">
         <div>
-          <span className="eyebrow">PRESERVED SOURCE</span>
-          <strong>Original technical intelligence brief · KR / EN</strong>
+          <span className="eyebrow">{t("research.eyebrow")}</span>
+          <strong>{t("research.title")}</strong>
         </div>
         <div className="research-bar-actions">
-          <div className="research-lang-toggle" role="group" aria-label="Report language">
+          <div className="research-lang-toggle" role="group" aria-label={t("research.langAria")}>
             <button
               type="button"
-              aria-pressed={lang === "ko"}
-              onClick={() => setLang("ko")}
+              aria-pressed={locale === "ko"}
+              onClick={() => setLocale("ko")}
             >
               KR · 한국어
             </button>
             <button
               type="button"
-              aria-pressed={lang === "en"}
-              onClick={() => setLang("en")}
+              aria-pressed={locale === "en"}
+              onClick={() => setLocale("en")}
             >
               EN · English
             </button>
           </div>
-          <a href={src} target="_blank" rel="noreferrer">Open standalone ↗</a>
+          <a href={src} target="_blank" rel="noreferrer">{t("research.openStandalone")} ↗</a>
         </div>
       </header>
       <iframe
+        ref={frame}
         className="research-frame"
         title="Preserved NTS virtual asset tracking research"
         src={src}
+        onLoad={syncFromFrame}
       />
     </div>
   );
