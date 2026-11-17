@@ -26,6 +26,8 @@
   https://en.bloomingbit.io/feed/news/96981
 - `[검증]` 2026-09-23 보도: 카카오그룹과 2025-04 MOU를 맺고 원화 스테이블코인 AML 등 사업 확장을 협력 중이다.
   https://www.mk.co.kr/news/economy/12160284
+- `[검증]` (2026-11-17 업데이트) 납품 이후 TranSight는 경찰청·국세청의 IAAN 수사협력(약 650건 중개, 2026-09-30 기준)과 케이뱅크 KYT 계약(2026-10-21)으로 확장됐다.
+  https://www.etoday.co.kr/news/view/2630563
 - `[검증]` 2026-04-23 베트남 군인상업은행(MB은행)과 가상자산 거래소 입출금 연동 기술검증(PoC)을 완료했다(파이낸셜뉴스 보도, 네이버 검색 결과 기준).
 - `[검증]` 별도 회사인 **보난자랩**의 JB인베스트먼트·삼일PwC 프리A 투자 보도는 보난자팩토리와 무관하므로 혼동 금지.
   https://v.daum.net/v/20260203105142457
@@ -39,8 +41,8 @@
 
 - `[검증]` Tornado Cash는 0.1/1/10/100 ETH 고정 액면(fixed denomination) 풀 구조로, zk-SNARK로 예치와 출금을 단절한다. 공개 디믹싱 도구는 다음 휴리스틱을 결합한다: (1) 같은 액면 풀에서 N개 예치 후 일정 시간창 내 N개 출금, (2) relayer 수수료를 뺀 실제 수취액(D−fee) 밴드 필터링, (3) denomination 프로파일, (4) 분할 출금 후 공통 하류 통합(consolidation) 주소 탐지.
   https://github.com/maslovsa/tornado-demix
-- `[검증]` 2025년 arXiv 연구("Clustering Deposit and Withdrawal Activity in Tornado Cash: A Cross-Chain Analysis")는 이더리움·BSC·폴리곤에서 주소 재사용·직접 전송·FIFO형 시간근접 휴리스틱 등을 통해 총 23억 달러 이상의 출금을 원입금과 연결했다고 주장한다. **이는 암호학적 증명이나 확정 귀속이 아니라 행동 휴리스틱 기반**이다.
-  https://arxiv.org/pdf/2510.09433v1
+- `[검증]` 2025년 arXiv 연구("Clustering Deposit and Withdrawal Activity in Tornado Cash: A Cross-Chain Analysis")는 이더리움·BSC·폴리곤에서 주소 재사용·직접 전송·FIFO형 시간근접 휴리스틱 등을 통해 총 23억 달러 이상의 출금을 원입금과 연결했다고 주장한다. **이는 암호학적 증명이나 확정 귀속이 아니라 행동 휴리스틱 기반**이다. (2026-11-17 업데이트) 해당 논문은 저자가 2025년 11월 18일 참고문헌 오류를 이유로 철회했으며, 2026년 11월 현재 수정본은 공개되지 않았다. 23억 달러는 이더리움 단독 기준(Fig.2)이다.
+  https://arxiv.org/abs/2510.09433v3
 - `[검증]` 업계 실무 자료에 따르면, 타이밍·액면·가스 설정·릴레이어/가스 대납 지갑·출금 스케줄·출금 후(post-exit) 추적을 누적해 확률 점수를 매기는 방식으로 후보집합을 축소한다.
   https://github.com/forefy/.context/blob/HEAD/skills/blockchain/blockchain-forensics/references/advanced-techniques.md
 - `[검증]` Tornado Cash는 2025-03-21 제재 해제 후 이용이 재증가했으며, 2025년에 약 25억 달러의 거래를 처리했다.
@@ -80,10 +82,13 @@
 ### 4.1 사업 개요
 - `[검증]` 국세청은 연간 약 80억 건의 가상자산 거래를 AI로 분석하는 '가상자산 통합분석시스템'을 구축 중이다. AI·머신러닝·통계 기법으로 거래명세서 이상패턴을 사전 탐지하고, 연령·성별·지역 인구통계 + 거래유형별 데이터를 이용해 불법거래 흐름을 검증한다. 목적은 자금세탁·변칙증여·역외탈세 차단이며, 2027년 가상자산 과세(거래소 자료제출 의무화)에 대비한 인프라다.
   https://www.mk.co.kr/news/economy/11970240
+- `[검증]` (2026-11-17 업데이트) 현행법상 2027년 1월 1일 시행이나, 정부는 2026년 11월 5일 2년 유예해 2029년 시행을 국회와 협의해 추진하겠다고 발표했다. 국회에서 소득세법이 개정돼야 확정되며, 개정되지 않으면 2027년 시행이 그대로 적용된다. 유예가 확정되면 첫 신고는 2030년 5월이 된다.
+  https://www.mk.co.kr/news/economy/12198438
 - `[검증]` 나라장터 사전규격 공개일 2026-03-20, 계약일부터 2026-12-31, 약 30억원 규모. 2026-03 입찰, 04 개발 착수, 11월 최종 오픈 목표.
   https://www.mk.co.kr/news/stock/11978457
 - `[검증]` 국회예산정책처 보고서는 2026년 말까지 '(가칭)가상자산 통합분석시스템' 구축 완료 계획을 명시한다.
   https://www.nabo.go.kr/board/file/bulkDown.do?idx=9433&bid=68
+- `[검증]` (2026-11-17 업데이트) 2026년 12월 말 구축·개통 목표(10~11월 통합테스트 진행 중). 다만 거래소 측 과세 시스템은 5곳 모두 미완성이고, 11월 5일 유예 발표로 국세청 고시 일정은 보류됐다.
 
 ### 4.2 4대 기능 (사전규격·보도 기준)
 1. VASP 제출 거래명세서 + 블록체인 거래정보 통합관리
@@ -246,4 +251,4 @@
 - https://www.nabo.go.kr/board/file/bulkDown.do?idx=9433&bid=68 (NABO 보고서)
 - https://v.daum.net/v/20260706140318646 (SKAI/AgensGraph)
 - https://dima-g2b.com/list/R26BK01455053 (2026 조달 공고 미러)
-- https://arxiv.org/pdf/2510.09433v1 (Tornado Cash 디믹싱 연구)
+- https://arxiv.org/abs/2510.09433v3 (Tornado Cash 디믹싱 연구 — 저자 철회, 2025-11-18)

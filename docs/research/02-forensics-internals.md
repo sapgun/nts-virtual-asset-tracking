@@ -60,7 +60,7 @@
 - 고정 액면 입금 + Pedersen-hash commitment → Merkle tree leaf. 출금은 미사용 commitment 소유를 보이는 zk-SNARK와 수취인(recipient) 지정. 【검증됨】 https://arxiv.org/pdf/2510.09433v2
 - relayer가 가스비를 내고 출금액에서 수수료를 취한다(예: 1 ETH 풀에서 0.02 ETH fee, 수취 0.98 ETH). 【검증됨】 https://arxiv.org/pdf/2510.09433v2
 - 분석 범위: Ethereum, Polygon, BSC의 배포 시점부터 2024-08까지. Tornado 입출금 및 관련 주소의 native coin·USDT·WETH 전송 수집. 【검증됨】 https://arxiv.org/pdf/2510.09433v2
-- **버전 주의**: arXiv 2510.09433은 abs 페이지에 "새 버전이 철회됨(withdrawn)" 표시가 있다. 결과는 확정적 사실이 아니라 학술 연구 수치로 취급한다. 【검증됨】 https://arxiv.org/abs/2510.09433v1
+- **버전 주의 (2026-11-17 업데이트)**: arXiv 2510.09433은 저자가 2025년 11월 18일 참고문헌 오류를 이유로 v3에서 철회했으며, 2026년 11월 현재 수정본은 공개되지 않았다. 결과는 확정적 사실이 아니라 철회된 학술 연구의 수치로 취급한다. 【검증됨】 https://arxiv.org/abs/2510.09433v3
 
 ### 2.2 디믹싱 휴리스틱 H1·H2·H3 (arXiv 2510.09433)
 
@@ -68,7 +68,7 @@
 - H2 transactional linkage: 입금측·출금측 주소 사이의 직접 native/USDT/WETH 전송이 있으면 연결. 동일 규모 랜덤 주소집합 150회 샘플링으로 null 분포와 비교. 【검증됨】 https://arxiv.org/pdf/2510.09433v2
 - H3 FIFO: H1/H2에서 식별된 주소를 제거한 뒤 입금을 바로 뒤의 가장 이른 출금과 매칭. 사용자가 빠르게 출금한다는 가정이라 **저신뢰·추론적 휴리스틱**. 【검증됨】 https://arxiv.org/pdf/2510.09433v2
 - 논문 보고 수치: H1+H2로 출금의 5.1–12.6% 연결; FIFO 추가로 15–22 percentage points; 전체 매칭 Ethereum 34.7%, Polygon 34.7%, BSC 21.1%. 【검증됨】 https://arxiv.org/pdf/2510.09433v2
-- 0.1 ETH 풀 FIFO: 11,474건(49%), 세 휴리스틱 합산 매칭률 60% 초과. 총 $2.3B 이상 연결 주장. 지연 분포는 heavy-tailed이며 짧은 지연에 질량 집중. 【검증됨】 https://arxiv.org/pdf/2510.09433v2
+- 0.1 ETH 풀 FIFO: 11,474건(49%), 세 휴리스틱 합산 매칭률 60% 초과. 총 $2.3B 이상 연결 주장 — 단, 23억 달러는 이더리움 단독 기준(Fig.2)이며, 해당 논문은 2025-11-18 철회됨. 지연 분포는 heavy-tailed이며 짧은 지연에 질량 집중. 【검증됨】 https://arxiv.org/pdf/2510.09433v2
 
 ### 2.3 Tutela 확장
 
@@ -315,7 +315,7 @@
 
 ## 12. Could not verify / 한계
 
-- arXiv 2510.09433의 "새 버전 철회" 표시: 결과 인용 시 버전 상태 명시 필요
+- arXiv 2510.09433 철회 (저자, 2025-11-18, 참고문헌 오류, v3): 결과 인용 시 철회 사실과 날짜를 명시하고, 23억 달러 수치는 이더리움 단독 기준(Fig.2)으로 표기할 것. 2026-11-17 기준 수정본 미공개
 - Zcash Sprout→Sapling→Orchard turnstile migration의 공식 spec/ZIP URL을 1차 확인하지 못함
 - Monero 패치 높이·버전의 공식 릴리스 교차검증 미완 (PR #7821 논의만 확인)
 - LayerZero·Wormhole 공식 문서/소스코드로 이벤트 키를 재검증하지 못함 (2차 SOP 문서 인용)

@@ -192,7 +192,7 @@ with graphsense.ApiClient(configuration) as api_client:
 
 - 최신 구현: block chunk read → **Rust union-find clustering engine** → mapping → `fresh_address_cluster`, `fresh_cluster_addresses`
 - 함수: `Clustering.process_transactions`, `get_mapping`, `rebuild_from_mapping`, `get_diff` — https://github.com/graphsense/graphsense-lib/releases/tag/v2.13.0
-- v2.15.0 변경: cluster ID는 `min(address_id)`, **CoinJoin co-spend 제외**, multi-member cluster만 저장, singleton은 read 시 합성 — https://github.com/graphsense/graphsense-lib/releases/tag/v2.15.0
+- 현행 버전: GraphSense lib 2.16.4 / API 2.19.0 (2026-10-28 기준). v2.15.0에서 도입된 변경: cluster ID는 `min(address_id)`, **CoinJoin co-spend 제외**, multi-member cluster만 저장, singleton은 read 시 합성 — https://github.com/graphsense/graphsense-lib/releases/tag/v2.16.4
 
 즉 공개적으로 확인되는 핵심 클러스터링 메커니즘은 **co-spend union-find + CoinJoin 제외**다. 상용사들의 "수백 개 휴리스틱"(Chainalysis 공식 문구)의 구체 내용은 `비공개(추론 불가)`.
 
@@ -261,6 +261,8 @@ with graphsense.ApiClient(configuration) as api_client:
 
 이 사건의 교훈: 믹서 자체의 익명성에도 불구하고 **제재 지정 주소의 유입/유출 지점 + 운영 인프라의 오프체인 흔적**이 추적의 축이 된다 (`업계 추론`).
 
+**후속 타임라인 (2026-11-17 업데이트)**: 2024-11-26 5th Circuit, OFAC 권한 초과 판결 → 2025-03-21 재무부 SDN 삭제 → 2025-08-06 Storm 부분 유죄(무허가 송금업 1건) + 2건 불일치 → 재심 2027-04-26 예정. 제재 해제와 형사재판은 별개 트랙이다.
+
 ### 6.3 ChipMixer (Minh Quốc Nguyễn) — 서비스 클러스터 귀속 → 인프라 압수
 
 **정부 1차** (DOJ EDPA, 2023-03-15): https://www.justice.gov/usao-edpa/pr/justice-department-investigation-leads-takedown-darknet-cryptocurrency-mixer-processed
@@ -292,6 +294,8 @@ with graphsense.ApiClient(configuration) as api_client:
 
 이 사건이 주는 방법론적 교훈: **휴리스틱 클러스터링의 오탐 문제는 법정에서 다퉈질 수 있으며, 실무에서는 복수 툴 교차검증 + 수동 검증이 표준**이다.
 
+**후속 (2026-11-17 업데이트)**: 2024년 3월 배심 유죄·11월 150개월 선고 이후, 2026년 9월 25일 D.C. Circuit이 항소를 기각하고 원심을 확정했다. 블록체인 분석 증거의 법정 채택이 항소심에서도 유지된 첫 주요 판례다.
+
 ### 6.5 Silk Road (Ross Ulbricht) — 서버 지갑 ↔ laptop 지갑 직접 흐름
 
 블록체인 요소는 **2차 보도** 수준으로만 확인 (법원 문서 직접 인용은 이번 세션 미수행 → `Could not verify`에 별도 기재):
@@ -300,6 +304,8 @@ with graphsense.ApiClient(configuration) as api_client:
 - 서버 위치 특정은 CAPTCHA 유출 IP라는 FBI 주장 (논란 있음) — https://cointelegraph.com/news/ulbrichts-defense-doubts-fbis-explanation-of-how-it-found-silk-roads-servers (2차)
 
 이 사건의 핵심 연결은 `클러스터링 → 거래소 소환장`이 아니라 **`서버 주소 확보 → blockchain direct flow → 압수 laptop의 private-key·관리자 증거`**다. 즉 온체인 분석은 신원 확정의 필요조건이 아니라, 압수된 장치·서버 증거와 결합될 때 위력을 발휘한다.
+
+**후속 (2026-11-17 업데이트)**: 운영자 Ross Ulbricht는 2015년 종신형 선고 후 2025년 1월 21일 전면 사면을 받아 석방됐다. 사면은 형 집행을 끝낸 것이지 유죄 평결 자체를 무효화한 것은 아니다.
 
 ---
 

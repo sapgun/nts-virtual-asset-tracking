@@ -1058,6 +1058,45 @@ button { color: inherit; }
   font: 800 12px ui-monospace, monospace;
 }
 
+.evidence-table article[role="button"] {
+  cursor: pointer;
+  transition: background .15s ease;
+}
+
+.evidence-table article[role="button"]:hover {
+  background: rgba(118,190,255,.07);
+}
+
+.evidence-table article[role="button"]:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: -2px;
+}
+
+.evidence-table article.selected {
+  background: rgba(118,190,255,.10);
+  box-shadow: inset 3px 0 0 var(--blue);
+}
+
+.evidence-detail {
+  margin-top: 18px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(13,18,25,.76);
+}
+
+.evidence-detail .inspector-head strong {
+  max-width: none;
+  font-size: 13px;
+}
+
+.evidence-detail-note {
+  margin-top: 14px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.55;
+}
+
 .hypothesis-card {
   margin-top: 22px;
   padding: 24px;
