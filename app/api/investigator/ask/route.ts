@@ -5,6 +5,26 @@ import type {
 } from "@/lib/adapters/investigator-adapter";
 import { investigatorAdapter } from "@/lib/adapters/investigator-provider-registry";
 import { evidence, graphNodes, hypotheses } from "@/lib/mock-data";
+import { t, tc } from "@/lib/i18n";
+import { isLocale, type Locale } from "@/lib/i18n/locales";
+import type { EvidenceItem, GraphNode, Hypothesis } from "@/lib/domain";
+
+/** Localize server-side fallback context (nodeId path) the same way the
+ * client localizes the context it sends. */
+function localizeNode(node: GraphNode, locale: Locale): GraphNode {
+  return { ...node, label: tc(locale, node.label), description: tc(locale, node.description) };
+}
+function localizeEvidence(item: EvidenceItem, locale: Locale): EvidenceItem {
+  return { ...item, title: tc(locale, item.title), detail: tc(locale, item.detail) };
+}
+function localizeHypothesis(item: Hypothesis, locale: Locale): Hypothesis {
+  return {
+    ...item,
+    claim: tc(locale, item.claim),
+    method: tc(locale, item.method),
+    counterEvidence: item.counterEvidence.map((entry) => tc(locale, entry)),
+  };
+}
 
 const allowedQuestions = new Set<InvestigatorQuestion>([
   "EXPLAIN_NODE",
@@ -34,12 +54,15 @@ export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as {
     question?: InvestigatorQuestion;
     nodeId?: string;
+    lang?: string;
     context?: InvestigatorContext;
   } | null;
 
+  const locale: Locale = isLocale(body?.lang) ? body.lang : "en";
+
   if (!body?.question || !allowedQuestions.has(body.question)) {
     return NextResponse.json(
-      { error: "a supported question is required" },
+      { error: t(locale, "api.investigator.questionRequired") },
       { status: 400 },
     );
   }
@@ -59,16 +82,16 @@ export async function POST(request: Request) {
 
     if (node) {
       context = {
-        node,
-        evidence,
-        hypothesis: hypotheses[0],
+        node: localizeNode(node, locale),
+        evidence: evidence.map((item) => localizeEvidence(item, locale)),
+        hypothesis: localizeHypothesis(hypotheses[0], locale),
       };
     }
   }
 
   if (!context) {
     return NextResponse.json(
-      { error: "valid investigator context is required" },
+      { error: t(locale, "api.investigator.contextRequired") },
       { status: 400 },
     );
   }
@@ -76,6 +99,7 @@ export async function POST(request: Request) {
   const response = await investigatorAdapter.answer({
     question: body.question,
     context,
+    locale,
   });
 
   return NextResponse.json({

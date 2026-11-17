@@ -3,6 +3,8 @@
 import { useEffect, useId, useMemo, useRef, useState, type PointerEvent } from "react";
 import type { GraphEdge, GraphNode } from "@/lib/domain";
 import { edgeGeometry, globePoints, layoutScene, nodeConnections, starField } from "@/lib/scene-graph";
+import { kindLabel } from "@/lib/i18n";
+import { useLanguage } from "@/lib/i18n/provider";
 import { Icon, type IconName } from "./icons";
 import s from "./workspace.module.css";
 
@@ -13,6 +15,7 @@ export function TopologyCanvas({ nodes, allNodes, edges, seedId, selectedId, onS
   nodes: GraphNode[]; allNodes: GraphNode[]; edges: GraphEdge[]; seedId: string; selectedId: string;
   onSelect: (node: GraphNode) => void;
 }) {
+  const { locale, t, tc } = useLanguage();
   const id = useId().replace(/:/g, "");
   const svg = useRef<SVGSVGElement>(null);
   const drag = useRef<{ id: number; x: number; y: number; ox: number; oy: number } | null>(null);
@@ -59,15 +62,15 @@ export function TopologyCanvas({ nodes, allNodes, edges, seedId, selectedId, onS
   }
   return <div className={s.canvas}>
     <div className={s.graphHeading}><span className={s.targetMark}><Icon name="target" /></span>
-      <div><h2>Transaction Topology</h2><p>{nodes.length} nodes · {edges.length} visible relationships</p></div>
+      <div><h2>{t("topology.title")}</h2><p>{t("topology.nodesRelationships", { nodes: nodes.length, edges: edges.length })}</p></div>
     </div>
-    <div className={s.graphTools} role="toolbar" aria-label="Graph controls">
-      <button title="Zoom in (+)" aria-label="Zoom in" onClick={() => zoom(.15)} disabled={camera.zoom >= 2.5}><Icon name="plus" /></button>
-      <button title="Zoom out (-)" aria-label="Zoom out" onClick={() => zoom(-.15)} disabled={camera.zoom <= .55}><Icon name="minus" /></button>
-      <button title="Reset view (0)" aria-label="Reset graph view" onClick={() => setCamera({ x: 0, y: 0, zoom: 1 })}><Icon name="fit" /></button>
-      <button title="Toggle spatial background" aria-label="Spatial background" aria-pressed={depth} onClick={() => setDepth((value) => !value)}><Icon name="layers" /></button>
+    <div className={s.graphTools} role="toolbar" aria-label={t("topology.controlsAria")}>
+      <button title={t("topology.zoomInTitle")} aria-label={t("topology.zoomInAria")} onClick={() => zoom(.15)} disabled={camera.zoom >= 2.5}><Icon name="plus" /></button>
+      <button title={t("topology.zoomOutTitle")} aria-label={t("topology.zoomOutAria")} onClick={() => zoom(-.15)} disabled={camera.zoom <= .55}><Icon name="minus" /></button>
+      <button title={t("topology.resetTitle")} aria-label={t("topology.resetAria")} onClick={() => setCamera({ x: 0, y: 0, zoom: 1 })}><Icon name="fit" /></button>
+      <button title={t("topology.depthTitle")} aria-label={t("topology.depthAria")} aria-pressed={depth} onClick={() => setDepth((value) => !value)}><Icon name="layers" /></button>
     </div>
-    <svg ref={svg} className={s.graphSvg} viewBox="0 0 1080 690" role="group" aria-label="Interactive transaction graph" tabIndex={0}
+    <svg ref={svg} className={s.graphSvg} viewBox="0 0 1080 690" role="group" aria-label={t("topology.graphAria")} tabIndex={0}
       onPointerDown={startPan} onPointerMove={pan} onPointerUp={stopPan} onPointerCancel={stopPan} onLostPointerCapture={() => { drag.current = null; }}
       onKeyDown={(event) => {
         if (event.target !== event.currentTarget) return;
@@ -116,24 +119,24 @@ export function TopologyCanvas({ nodes, allNodes, edges, seedId, selectedId, onS
           const isSeed = node.id === seedId;
           return <g key={node.id} data-node={node.id} data-kind={node.kind} data-state={node.state}
             className={`${s.sceneNode} ${active ? s.selectedNode : ""}`} transform={`translate(${node.x} ${node.y})`}
-            role="button" tabIndex={0} aria-pressed={active} aria-label={`${node.label}, ${node.state}. Inspect node.`}
+            role="button" tabIndex={0} aria-pressed={active} aria-label={t("topology.nodeAria", { label: tc(node.label), state: node.state })}
             onClick={() => onSelect(node)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); onSelect(node); } }}>
             {active && <><circle className={s.halo} r={node.radius + 7} filter={`url(#${id}-glow)`} /><circle className={s.orbitRing} r={node.radius + 10} /></>}
             <circle className={s.nodeFace} r={node.radius} fill={`url(#${id}-${isSeed ? "seed" : "node"})`} />
             <Icon name={isSeed ? "eth" : kindIcons[node.kind]} x={-13} y={-13} width={26} height={26} />
-            <text className={s.nodeLabel} x="0" y={node.radius + 26}>{node.label}</text>
-            <text className={s.nodeSublabel} x="0" y={node.radius + 45}>{isSeed ? "Seed address" : node.kind} · {node.state.toLowerCase()}</text>
+            <text className={s.nodeLabel} x="0" y={node.radius + 26}>{tc(node.label)}</text>
+            <text className={s.nodeSublabel} x="0" y={node.radius + 45}>{isSeed ? t("topology.seedAddress") : kindLabel(locale, node.kind)} · {node.state.toLowerCase()}</text>
           </g>;
         })}
         {selected && <foreignObject x={Math.min(795, selected.x + 53)} y={Math.max(78, selected.y - 110)} width="246" height="163" pointerEvents="none" aria-hidden="true">
-          <div className={s.nodePopover}><strong><Icon name={selected.id === seedId ? "eth" : kindIcons[selected.kind]} />{selected.label}</strong>
+          <div className={s.nodePopover}><strong><Icon name={selected.id === seedId ? "eth" : kindIcons[selected.kind]} />{tc(selected.label)}</strong>
             <span className={s.badge} data-state={selected.state}>{selected.state}</span>
-            <dl><div><dt>Incoming links</dt><dd>{counts.incoming}</dd></div><div><dt>Outgoing links</dt><dd>{counts.outgoing}</dd></div><div><dt>Identity attribution</dt><dd>Not established</dd></div></dl>
+            <dl><div><dt>{t("inspector.incomingLinks")}</dt><dd>{counts.incoming}</dd></div><div><dt>{t("inspector.outgoingLinks")}</dt><dd>{counts.outgoing}</dd></div><div><dt>{t("topology.identityAttribution")}</dt><dd>{t("topology.notEstablished")}</dd></div></dl>
           </div>
         </foreignObject>}
       </g>
     </svg>
-    <div className={s.graphSignature}>TRACE. CONNECT. VERIFY.<small>Relationships are not identities.</small></div>
-    <div className={s.zoomReadout}>{Math.round(camera.zoom * 100)}%<small>Drag to pan · + / − to zoom</small></div>
+    <div className={s.graphSignature}>{t("topology.signature")}<small>{t("topology.signatureNote")}</small></div>
+    <div className={s.zoomReadout}>{Math.round(camera.zoom * 100)}%<small>{t("topology.zoomHint")}</small></div>
   </div>;
 }

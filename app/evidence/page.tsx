@@ -6,30 +6,41 @@ import { EvidenceQualityCard } from "@/components/evidence-quality-card";
 import { StateBadge } from "@/components/state-badge";
 import { evidenceTransitionLedger } from "@/lib/evidence-audit-data";
 import { evidence, hypotheses, investigation } from "@/lib/mock-data";
+import { useLanguage } from "@/lib/i18n/provider";
 
 export default function EvidencePage() {
+  const { t, tc } = useLanguage();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selected = evidence.find((item) => item.id === selectedId) ?? null;
+  const stateWord = selected
+    ? selected.state === "OBSERVED"
+      ? t("evidence.stateWordObserved")
+      : selected.state === "INFERRED"
+        ? t("evidence.stateWordInferred")
+        : selected.state === "ATTRIBUTED"
+          ? t("evidence.stateWordAttributed")
+          : t("evidence.stateWordUnverified")
+    : "";
 
   return (
     <div className="content-page">
       <header className="page-header">
-        <span className="eyebrow">EVIDENCE ROOM</span>
-        <h1>Build the case without collapsing uncertainty.</h1>
-        <p>Every claim carries provenance, confidence and an explicit evidence state.</p>
+        <span className="eyebrow">{t("evidence.eyebrow")}</span>
+        <h1>{t("evidence.title")}</h1>
+        <p>{t("evidence.intro")}</p>
       </header>
 
       <section className="evidence-overview">
         <div>
-          <span>Case</span>
+          <span>{t("evidence.case")}</span>
           <b>{investigation.id}</b>
         </div>
         <div>
-          <span>Completeness</span>
+          <span>{t("evidence.completeness")}</span>
           <b>{investigation.evidenceCompleteness}%</b>
         </div>
         <div>
-          <span>Hypotheses</span>
+          <span>{t("evidence.hypotheses")}</span>
           <b>{hypotheses.length}</b>
         </div>
       </section>
@@ -57,8 +68,8 @@ export default function EvidencePage() {
           >
             <div className="evidence-id">{item.id}</div>
             <div>
-              <strong>{item.title}</strong>
-              <p>{item.detail}</p>
+              <strong>{tc(item.title)}</strong>
+              <p>{tc(item.detail)}</p>
             </div>
             <div><StateBadge state={item.state} /></div>
             <div className="evidence-confidence">{Math.round(item.confidence * 100)}%</div>
@@ -70,10 +81,10 @@ export default function EvidencePage() {
         <section className="evidence-detail" aria-live="polite">
           <div className="inspector-head">
             <div>
-              <span className="eyebrow">EVIDENCE DETAIL</span>
-              <strong>{selected.id} · {selected.title}</strong>
+              <span className="eyebrow">{t("evidence.detailEyebrow")}</span>
+              <strong>{selected.id} · {tc(selected.title)}</strong>
             </div>
-            <button aria-label="Close evidence detail" onClick={() => setSelectedId(null)}>×</button>
+            <button aria-label={t("evidence.closeDetailAria")} onClick={() => setSelectedId(null)}>×</button>
           </div>
           <div className="inspector-body">
             <div className="inspector-section node-focus">
@@ -81,8 +92,8 @@ export default function EvidencePage() {
                 <StateBadge state={selected.state} />
                 <b>{Math.round(selected.confidence * 100)}%</b>
               </div>
-              <h2>{selected.title}</h2>
-              <p>{selected.detail}</p>
+              <h2>{tc(selected.title)}</h2>
+              <p>{tc(selected.detail)}</p>
               <div className="confidence-track">
                 <i style={{ width: Math.round(selected.confidence * 100) + "%" }} />
               </div>
@@ -91,10 +102,7 @@ export default function EvidencePage() {
                 <span>#{selected.state}</span>
               </div>
               <p className="evidence-detail-note">
-                Confidence is an analyst judgment on this synthetic dataset, not a
-                measurement of ground truth. State {selected.state} means this item is
-                treated as {selected.state === "OBSERVED" ? "directly observed" : selected.state === "INFERRED" ? "inferred from a pattern" : selected.state === "ATTRIBUTED" ? "attributed from a public source" : "not yet verified"} — it does not
-                upgrade the rest of the case on its own.
+                {t("evidence.detailNote", { state: selected.state, stateWord })}
               </p>
             </div>
           </div>
@@ -102,12 +110,12 @@ export default function EvidencePage() {
       )}
 
       <section className="hypothesis-card">
-        <span className="eyebrow">HYPOTHESIS REGISTER</span>
+        <span className="eyebrow">{t("evidence.hypothesisRegister")}</span>
         {hypotheses.map((item) => (
           <div key={item.id}>
             <div>
-              <h2>{item.claim}</h2>
-              <p>{item.method}</p>
+              <h2>{tc(item.claim)}</h2>
+              <p>{tc(item.method)}</p>
             </div>
             <div className="hypothesis-score">{Math.round(item.confidence * 100)}%</div>
           </div>

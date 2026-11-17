@@ -31,6 +31,9 @@
 .searchButton { display: flex; gap: 10px; align-items: center; color: var(--secondary); border: 1px solid var(--line); border-radius: 10px; background: #091726; padding: 10px 12px; margin-left: auto; min-height: 40px; font-size: 12px !important; }
 .searchButton kbd { margin-left: 25px; font-size: 10px; color: #8ca7bf; border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; }
 .labMark { display: grid; place-items: center; width: 36px; height: 36px; border: 1px solid #22445d; background: #0b1b2e; border-radius: 50%; font-size: 10px; font-weight: 750; flex-shrink: 0; }
+.langToggle { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; flex-shrink: 0; background: #091726; }
+.langToggle button { padding: 8px 10px; border: 0; background: transparent; color: var(--secondary); font-size: 11px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+.langToggle button[aria-pressed="true"] { background: #1b6ea8; color: #fff; }
 .mobileMenu { display: none; position: relative; }
 .mobileMenu summary { list-style: none; padding: 10px; cursor: pointer; }
 .mobileMenu > div { position: absolute; right: 0; top: 46px; width: 220px; border: 1px solid var(--line); border-radius: 12px; padding: 8px; background: #071522; box-shadow: 0 20px 50px #000a; }
@@ -232,6 +235,8 @@
   .nav a { font-size: 11px; padding: 0 7px; }
   .nav a:not([aria-current="page"]) { display: none; }
   .searchButton { padding: 7px; margin-left: 0; }
+  .langToggle button { padding: 7px 8px; }
+  .langToggle button span { display: none; }
   .screen { padding: 0 8px 8px; height: calc(100dvh - 64px); }
   .caseBar { flex-wrap: wrap; gap: 10px; padding: 12px 3px; }
   .backButton { display: none; }

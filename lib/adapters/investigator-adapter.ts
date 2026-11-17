@@ -4,6 +4,7 @@ import type {
   GraphNode,
   Hypothesis,
 } from "@/lib/domain";
+import type { Locale } from "@/lib/i18n/locales";
 
 export type InvestigatorQuestion =
   | "EXPLAIN_NODE"
@@ -20,6 +21,8 @@ export interface InvestigatorContext {
 export interface InvestigatorRequest {
   question: InvestigatorQuestion;
   context: InvestigatorContext;
+  /** Response language; defaults to English when omitted. */
+  locale?: Locale;
 }
 
 export interface InvestigatorCitation {

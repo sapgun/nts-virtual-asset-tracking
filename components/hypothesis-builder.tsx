@@ -3,6 +3,7 @@
 import { FormEvent, useMemo, useState } from "react";
 import { StateBadge } from "@/components/state-badge";
 import type { EvidenceItem, Hypothesis } from "@/lib/domain";
+import { useLanguage } from "@/lib/i18n/provider";
 
 export interface HypothesisDraftEvent {
   hypothesis: Hypothesis;
@@ -16,6 +17,7 @@ export function HypothesisBuilder({
   evidence: EvidenceItem[];
   onCreate?: (event: HypothesisDraftEvent) => void;
 }) {
+  const { t, tc } = useLanguage();
   const [open, setOpen] = useState(false);
   const [claim, setClaim] = useState("");
   const [method, setMethod] = useState("");
@@ -69,14 +71,14 @@ export function HypothesisBuilder({
 
     const hypothesis: Hypothesis = {
       id: "HYP-" + crypto.randomUUID().slice(0, 8).toUpperCase(),
-      claim: claim.trim() || "Unspecified hypothesis",
-      method: method.trim() || "method not documented",
+      claim: claim.trim() || t("evidence.builder.unspecifiedHypothesis"),
+      method: method.trim() || t("evidence.builder.methodNotDocumented"),
       confidence: proposedConfidence,
       state: proposedState,
       supportingEvidence: selected,
       counterEvidence: counterEvidence.trim()
         ? [counterEvidence.trim()]
-        : ["No counter-evidence documented yet"],
+        : [t("evidence.builder.noCounterEvidence")],
     };
 
     const createdAt = new Date().toISOString();
@@ -95,36 +97,36 @@ export function HypothesisBuilder({
     <div className="hypothesis-builder">
       <div className="hypothesis-builder-head">
         <div>
-          <span className="eyebrow">HYPOTHESIS BUILDER</span>
-          <small>Evidence-linked analyst draft</small>
+          <span className="eyebrow">{t("evidence.builder.eyebrow")}</span>
+          <small>{t("evidence.builder.subtitle")}</small>
         </div>
         <button onClick={() => setOpen((value) => !value)}>
-          {open ? "Close" : "New hypothesis +"}
+          {open ? t("evidence.builder.close") : t("evidence.builder.newHypothesis")}
         </button>
       </div>
 
       {open && (
         <form className="hypothesis-form" onSubmit={submit}>
           <label>
-            <span>Claim</span>
+            <span>{t("evidence.builder.claim")}</span>
             <textarea
               value={claim}
               onChange={(event) => setClaim(event.target.value)}
-              placeholder="What relationship or explanation are you testing?"
+              placeholder={t("evidence.builder.claimPlaceholder")}
             />
           </label>
 
           <label>
-            <span>Method</span>
+            <span>{t("evidence.builder.method")}</span>
             <input
               value={method}
               onChange={(event) => setMethod(event.target.value)}
-              placeholder="e.g. temporal + convergence heuristic"
+              placeholder={t("evidence.builder.methodPlaceholder")}
             />
           </label>
 
           <div className="hypothesis-evidence-select">
-            <span>Supporting evidence</span>
+            <span>{t("evidence.builder.supportingEvidence")}</span>
             <div>
               {evidence.map((item) => (
                 <button
@@ -134,31 +136,31 @@ export function HypothesisBuilder({
                   onClick={() => toggleEvidence(item.id)}
                 >
                   <b>{item.id}</b>
-                  <small>{item.title}</small>
+                  <small>{tc(item.title)}</small>
                 </button>
               ))}
             </div>
           </div>
 
           <label>
-            <span>Counter-evidence / alternative explanation</span>
+            <span>{t("evidence.builder.counterEvidence")}</span>
             <textarea
               value={counterEvidence}
               onChange={(event) => setCounterEvidence(event.target.value)}
-              placeholder="What else could explain the same pattern?"
+              placeholder={t("evidence.builder.counterPlaceholder")}
             />
           </label>
 
           <div className="hypothesis-preview">
             <StateBadge state={proposedState} />
             <span>
-              Draft confidence
+              {t("evidence.builder.draftConfidence")}
               <b>{Math.round(proposedConfidence * 100)}%</b>
             </span>
           </div>
 
           <button className="hypothesis-create" type="submit">
-            Save analyst draft
+            {t("evidence.builder.saveDraft")}
           </button>
         </form>
       )}

@@ -5,6 +5,8 @@ import type {
   InvestigatorResponse,
 } from "@/lib/adapters/investigator-adapter";
 import type { EvidenceItem } from "@/lib/domain";
+import { format, t } from "../i18n";
+import { DEFAULT_LOCALE, type Locale } from "../i18n/locales";
 
 function citationsFor(
   refs: string[],
@@ -28,6 +30,7 @@ export class RuleBasedInvestigatorAdapter implements InvestigatorAdapter {
     request: InvestigatorRequest,
   ): Promise<InvestigatorResponse> {
     const { node, hypothesis, evidence } = request.context;
+    const locale: Locale = request.locale ?? DEFAULT_LOCALE;
 
     const observed = evidence.filter((item) => item.state === "OBSERVED");
     const attributed = evidence.filter((item) => item.state === "ATTRIBUTED");
@@ -38,8 +41,8 @@ export class RuleBasedInvestigatorAdapter implements InvestigatorAdapter {
       evidenceRefs: supportingRefs,
       citations: citationsFor(supportingRefs, evidence),
       cautions: [
-        "Transaction relationships do not establish natural-person identity.",
-        "Confidence is an analytical support level, not a probability of guilt.",
+        t(locale, "evidence.copilot.answers.cautionIdentity"),
+        t(locale, "evidence.copilot.answers.cautionConfidence"),
       ],
       generatedBy: "rule-based-investigator-v1-cited",
     };
@@ -48,19 +51,29 @@ export class RuleBasedInvestigatorAdapter implements InvestigatorAdapter {
       case "EXPLAIN_NODE":
         return {
           ...base,
-          answer:
-            `${node.label} is currently classified as ${node.state} at ${Math.round(
-              node.confidence * 100,
-            )}% confidence. ${node.description} The current hypothesis is: "${hypothesis.claim}"`,
+          answer: format(
+            t(locale, "evidence.copilot.answers.explainNode"),
+            {
+              label: node.label,
+              state: node.state,
+              confidence: Math.round(node.confidence * 100),
+              description: node.description,
+              claim: hypothesis.claim,
+            },
+          ),
         };
 
       case "EXPLAIN_CONFIDENCE":
         return {
           ...base,
-          answer:
-            `The confidence reflects the evidence class and current analytical support, not identity certainty. This context contains ${observed.length} observed item(s), ${attributed.length} attributed item(s), and the active hypothesis is at ${Math.round(
-              hypothesis.confidence * 100,
-            )}%. Confidence should increase only when independent evidence reduces plausible alternatives.`,
+          answer: format(
+            t(locale, "evidence.copilot.answers.explainConfidence"),
+            {
+              observed: observed.length,
+              attributed: attributed.length,
+              confidence: Math.round(hypothesis.confidence * 100),
+            },
+          ),
         };
 
       case "MISSING_EVIDENCE": {
@@ -72,12 +85,15 @@ export class RuleBasedInvestigatorAdapter implements InvestigatorAdapter {
           citations: citationsFor(refs, evidence),
           answer:
             unverified.length > 0
-              ? `The largest explicit gap is represented by ${unverified
-                  .map((item) => item.title)
-                  .join(
-                    ", ",
-                  )}. Preserve it as UNVERIFIED until the required evidence class is independently obtained.`
-              : "No explicit UNVERIFIED evidence item is registered. Review counter-evidence, provenance diversity, and whether an independent evidence class is still missing before promoting any claim.",
+              ? format(
+                  t(locale, "evidence.copilot.answers.missingWithGaps"),
+                  {
+                    titles: unverified
+                      .map((item) => item.title)
+                      .join(", "),
+                  },
+                )
+              : t(locale, "evidence.copilot.answers.missingNone"),
         };
       }
 
@@ -86,10 +102,10 @@ export class RuleBasedInvestigatorAdapter implements InvestigatorAdapter {
           ...base,
           answer:
             node.kind === "exchange"
-              ? "The next useful step is not automatically another graph hop. Identify what independently obtainable account-level evidence would be required before moving from service attribution toward account attribution."
+              ? t(locale, "evidence.copilot.answers.nextExchange")
               : node.state === "OBSERVED"
-                ? "Keep the next step observation-first: inspect the next public-chain hop, preserve source provenance, then create a separate hypothesis only if a reproducible analytical signal appears."
-                : "Compare the current inference against an independent source and record at least one competing explanation before changing the evidence state.",
+                ? t(locale, "evidence.copilot.answers.nextObserved")
+                : t(locale, "evidence.copilot.answers.nextDefault"),
         };
     }
   }

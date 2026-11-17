@@ -10,6 +10,7 @@ import {
   deterministicBridgePair,
   heuristicBridgePair,
 } from "@/lib/bridge-matching-data";
+import { useLanguage } from "@/lib/i18n/provider";
 
 type Scenario = "KEY" | "HEURISTIC";
 
@@ -24,28 +25,29 @@ function ObservationCard({
 }: {
   observation: BridgeObservation;
 }) {
+  const { t } = useLanguage();
   return (
     <article className="bridge-observation">
       <div className="bridge-direction">
-        <span>{observation.direction}</span>
+        <span>{t(observation.direction === "SOURCE" ? "bridge.directionSource" : "bridge.directionDestination")}</span>
         <b>{observation.chain}</b>
       </div>
       <div className="bridge-fields">
         <div>
-          <small>PROTOCOL</small>
+          <small>{t("bridge.protocol")}</small>
           <span>{observation.protocol}</span>
         </div>
         <div>
-          <small>TX</small>
+          <small>{t("bridge.tx")}</small>
           <span>{short(observation.txHash)}</span>
         </div>
         <div>
-          <small>ASSET</small>
+          <small>{t("bridge.asset")}</small>
           <span>{observation.asset}</span>
         </div>
         <div>
-          <small>MESSAGE KEY</small>
-          <span>{observation.messageKey || "not exposed"}</span>
+          <small>{t("bridge.messageKey")}</small>
+          <span>{observation.messageKey || t("bridge.notExposed")}</span>
         </div>
       </div>
     </article>
@@ -53,6 +55,7 @@ function ObservationCard({
 }
 
 export function BridgeMatchingLab() {
+  const { t, tc } = useLanguage();
   const [scenario, setScenario] = useState<Scenario>("KEY");
 
   const pair =
@@ -65,6 +68,13 @@ export function BridgeMatchingLab() {
     [pair],
   );
 
+  const modeLabel =
+    result.mode === "DETERMINISTIC_KEY"
+      ? t("bridge.modeDeterministic")
+      : result.mode === "HEURISTIC"
+        ? t("bridge.modeHeuristic")
+        : t("bridge.modeNoMatch");
+
   return (
     <div className="bridge-lab">
       <div className="bridge-scenario-tabs">
@@ -72,13 +82,13 @@ export function BridgeMatchingLab() {
           className={scenario === "KEY" ? "active" : ""}
           onClick={() => setScenario("KEY")}
         >
-          Deterministic message key
+          {t("bridge.tabDeterministic")}
         </button>
         <button
           className={scenario === "HEURISTIC" ? "active" : ""}
           onClick={() => setScenario("HEURISTIC")}
         >
-          Time / value heuristic
+          {t("bridge.tabHeuristic")}
         </button>
       </div>
 
@@ -91,7 +101,7 @@ export function BridgeMatchingLab() {
           </div>
           <StateBadge state={result.state} />
           <strong>{Math.round(result.confidence * 100)}%</strong>
-          <small>{result.mode.replaceAll("_", " ")}</small>
+          <small>{modeLabel}</small>
         </div>
 
         <ObservationCard observation={pair[1]} />
@@ -99,18 +109,18 @@ export function BridgeMatchingLab() {
 
       <div className="bridge-analysis">
         <article>
-          <span className="eyebrow">WHY THIS MATCH</span>
+          <span className="eyebrow">{t("bridge.whyMatch")}</span>
           <ul>
             {result.reasons.map((reason) => (
-              <li key={reason}>{reason}</li>
+              <li key={reason}>{tc(reason)}</li>
             ))}
           </ul>
         </article>
         <article className="bridge-caution">
-          <span className="eyebrow">WHAT IT DOES NOT PROVE</span>
+          <span className="eyebrow">{t("bridge.notProve")}</span>
           <ul>
             {result.limitations.map((item) => (
-              <li key={item}>{item}</li>
+              <li key={item}>{tc(item)}</li>
             ))}
           </ul>
         </article>

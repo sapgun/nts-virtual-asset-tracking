@@ -1,3 +1,6 @@
+import { t } from "./i18n";
+import { DEFAULT_LOCALE, type Locale } from "./i18n/locales";
+
 export const EVIDENCE_PACKET_SCHEMA = "nts-intel/evidence-packet@1";
 
 function stableValue(value: unknown): unknown {
@@ -41,6 +44,7 @@ export async function sha256Hex(value: unknown) {
 
 export async function buildEvidencePacket<T extends object>(
   payload: T,
+  locale: Locale = DEFAULT_LOCALE,
 ) {
   const manifest = {
     schema: EVIDENCE_PACKET_SCHEMA,
@@ -62,8 +66,7 @@ export async function buildEvidencePacket<T extends object>(
     integrity: {
       contentHash,
       signed: false,
-      note:
-        "Hash provides tamper detection for this exported packet. It is not a digital signature or legal certification.",
+      note: t(locale, "investigate.packetIntegrityNote"),
     },
   };
 }

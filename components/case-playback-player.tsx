@@ -4,8 +4,10 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { StateBadge } from "@/components/state-badge";
 import type { CasePlayback } from "@/lib/case-playback-data";
+import { useLanguage } from "@/lib/i18n/provider";
 
 export function CasePlaybackPlayer({ playback }: { playback: CasePlayback }) {
+  const { t, tc } = useLanguage();
   const [stepIndex, setStepIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
   const step = playback.steps[stepIndex];
@@ -35,14 +37,14 @@ export function CasePlaybackPlayer({ playback }: { playback: CasePlayback }) {
     <div className="playback-page">
       <header className="playback-header">
         <div>
-          <Link className="back-link" href="/cases">← Case Files</Link>
-          <span className="eyebrow">CASE RECONSTRUCTION</span>
+          <Link className="back-link" href="/cases">← {t("cases.player.back")}</Link>
+          <span className="eyebrow">{t("cases.player.eyebrow")}</span>
           <h1>{playback.title}</h1>
-          <p>{playback.subtitle}</p>
+          <p>{tc(playback.subtitle)}</p>
         </div>
         <div className="playback-source-boundary">
-          <span>SOURCE BOUNDARY</span>
-          <p>{playback.sourceBoundary}</p>
+          <span>{t("cases.player.sourceBoundary")}</span>
+          <p>{tc(playback.sourceBoundary)}</p>
         </div>
       </header>
 
@@ -66,8 +68,8 @@ export function CasePlaybackPlayer({ playback }: { playback: CasePlayback }) {
             >
               <span>{String(index + 1).padStart(2, "0")}</span>
               <div>
-                <small>{item.phase}</small>
-                <b>{item.title}</b>
+                <small>{tc(item.phase)}</small>
+                <b>{tc(item.title)}</b>
               </div>
             </button>
           ))}
@@ -76,8 +78,8 @@ export function CasePlaybackPlayer({ playback }: { playback: CasePlayback }) {
         <main className="playback-stage">
           <div className="stage-topline">
             <div>
-              <span className="eyebrow">STEP {String(stepIndex + 1).padStart(2, "0")} · {step.phase}</span>
-              <h2>{step.title}</h2>
+              <span className="eyebrow">{t("cases.player.stepLabel", { step: String(stepIndex + 1).padStart(2, "0"), phase: tc(step.phase) })}</span>
+              <h2>{tc(step.title)}</h2>
             </div>
             <StateBadge state={step.state} />
           </div>
@@ -85,7 +87,7 @@ export function CasePlaybackPlayer({ playback }: { playback: CasePlayback }) {
           <div className="case-visual">
             <div className="case-visual-grid" />
             <div className="case-signal core">
-              <span>CASE</span>
+              <span>{t("cases.player.caseVisual")}</span>
               <b>{playback.title}</b>
             </div>
             {playback.steps.slice(0, stepIndex + 1).map((item, index) => {
@@ -99,7 +101,7 @@ export function CasePlaybackPlayer({ playback }: { playback: CasePlayback }) {
                   style={{ left: x + "%", top: y + "%" }}
                 >
                   <span>{String(index + 1).padStart(2, "0")}</span>
-                  <b>{item.phase}</b>
+                  <b>{tc(item.phase)}</b>
                 </div>
               );
             })}
@@ -115,22 +117,22 @@ export function CasePlaybackPlayer({ playback }: { playback: CasePlayback }) {
 
           <section className="playback-analysis">
             <article>
-              <span>SUMMARY</span>
-              <p>{step.summary}</p>
+              <span>{t("cases.player.summary")}</span>
+              <p>{tc(step.summary)}</p>
             </article>
             <article>
-              <span>WHAT THIS SUPPORTS</span>
-              <p>{step.observation}</p>
+              <span>{t("cases.player.supports")}</span>
+              <p>{tc(step.observation)}</p>
             </article>
             <article className="caution">
-              <span>LIMITATION</span>
-              <p>{step.limitation}</p>
+              <span>{t("cases.player.limitation")}</span>
+              <p>{tc(step.limitation)}</p>
             </article>
           </section>
 
           <div className="playback-confidence">
             <div>
-              <span>Step confidence</span>
+              <span>{t("cases.player.stepConfidence")}</span>
               <b>{Math.round(step.confidence * 100)}%</b>
             </div>
             <div className="confidence-track">
@@ -146,7 +148,7 @@ export function CasePlaybackPlayer({ playback }: { playback: CasePlayback }) {
               }}
               disabled={stepIndex === 0}
             >
-              Previous
+              {t("cases.player.previous")}
             </button>
             <button
               className="play-button"
@@ -161,7 +163,7 @@ export function CasePlaybackPlayer({ playback }: { playback: CasePlayback }) {
                 setPlaying(true);
               }}
             >
-              {playing ? "Pause" : stepIndex === playback.steps.length - 1 ? "Replay" : "Auto play"}
+              {playing ? t("cases.player.pause") : stepIndex === playback.steps.length - 1 ? t("cases.player.replay") : t("cases.player.autoPlay")}
             </button>
             <button
               onClick={() => {
@@ -170,24 +172,24 @@ export function CasePlaybackPlayer({ playback }: { playback: CasePlayback }) {
               }}
               disabled={stepIndex === playback.steps.length - 1}
             >
-              Next evidence
+              {t("cases.player.nextEvidence")}
             </button>
           </div>
         </main>
 
         <aside className="playback-evidence">
-          <span className="eyebrow">EVIDENCE ARTIFACTS</span>
+          <span className="eyebrow">{t("cases.player.artifacts")}</span>
           <div className="artifact-list">
             {visibleArtifacts.map((artifact, index) => (
               <div key={artifact + index}>
                 <span>{String(index + 1).padStart(2, "0")}</span>
-                <b>{artifact}</b>
+                <b>{tc(artifact)}</b>
               </div>
             ))}
           </div>
           <div className="playback-rule">
-            <span>RULE</span>
-            <p>An evidence state describes the support class. It is not a probability of guilt or identity.</p>
+            <span>{t("cases.player.rule")}</span>
+            <p>{t("cases.player.ruleBody")}</p>
           </div>
         </aside>
       </div>
