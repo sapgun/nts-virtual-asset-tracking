@@ -16,7 +16,8 @@ type RouteKey =
   | "bridge"
   | "cases"
   | "academy"
-  | "research";
+  | "research"
+  | "calculator";
 
 const routes: Array<{ href: string; key: RouteKey; icon: IconName }> = [
   { href: "/", key: "command", icon: "target" },
@@ -27,6 +28,7 @@ const routes: Array<{ href: string; key: RouteKey; icon: IconName }> = [
   { href: "/cases", key: "cases", icon: "case" },
   { href: "/academy", key: "academy", icon: "academy" },
   { href: "/research", key: "research", icon: "research" },
+  { href: "/calculator", key: "calculator", icon: "bank" },
 ];
 
 export function AppShell({ children }: { children: ReactNode }) {
