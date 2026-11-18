@@ -128,6 +128,18 @@ test('every KO string is non-empty', () => {
   walk(ko);
 });
 
+test('KO nav labels are translated (D1: no bare English page names)', () => {
+  for (const [key, item] of Object.entries(ko.shell.nav)) {
+    assert.ok(/[가-힣]/.test(item.label), `nav label untranslated: ${key} = ${item.label}`);
+  }
+  assert.ok(/[가-힣]/.test(ko.notFound.back), `notFound.back untranslated: ${ko.notFound.back}`);
+});
+
+test('document titles differ per locale (D2)', () => {
+  assert.ok(en.meta.title.trim().length > 0 && ko.meta.title.trim().length > 0);
+  assert.notEqual(en.meta.title, ko.meta.title);
+});
+
 test('every data-module string is translated or explicitly allowed', () => {
   const strings = [];
   collectStrings(mockData, strings);

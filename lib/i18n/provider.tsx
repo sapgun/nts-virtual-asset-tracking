@@ -18,7 +18,7 @@ import {
   resolveLocale,
   type Locale,
 } from "./locales";
-import { t as translate, tc as translateContent } from "./index";
+import { dictionaries, t as translate, tc as translateContent } from "./index";
 
 interface LanguageContextValue {
   locale: Locale;
@@ -90,8 +90,12 @@ export function LanguageProvider({
   }, []);
 
   // Persist every locale change (cookie + localStorage + <html lang>).
+  // The document title must follow too: generateMetadata only runs on the
+  // server, so without this a client-side toggle leaves a stale <title>
+  // until the next navigation.
   useEffect(() => {
     persistStorage(locale);
+    document.title = dictionaries[locale].meta.title;
   }, [locale]);
 
   const value = useMemo<LanguageContextValue>(
