@@ -7,6 +7,10 @@ import type { Dict } from "./index";
  *   UNVERIFIED); state *words* in prose are translated.
  * - VASP, CARF, KYT, Reactor, Chainalysis, TRM, Blockscout stay as-is.
  * - 믹서 / 브리지 / 필 체인 / 패스스루 follow the report's usage.
+ * - Command (home) → 지휘. The other nav labels are 2–3 character nouns
+ *   (조사 / 증거 / 탐색기 / 브리지 / 사건 / 아카데미 / 보고서); 지휘 matches
+ *   that pattern and the intel command-centre theme. "홈" was rejected as
+ *   too generic, "사령부" as too long and too militaristic.
  */
 export const ko: Dict = {
   meta: {
@@ -22,7 +26,7 @@ export const ko: Dict = {
     navAria: "주요 탐색",
     nav: {
       command: {
-        label: "Command",
+        label: "지휘",
         detail: "관찰 또는 조사 워크플로 선택",
       },
       investigate: {
@@ -454,7 +458,7 @@ export const ko: Dict = {
   notFound: {
     title: "페이지를 찾을 수 없습니다",
     body: "요청하신 페이지가 이 워크벤치에 없습니다.",
-    back: "Command로 돌아가기",
+    back: "지휘로 돌아가기",
   },
   api: {
     chain: {

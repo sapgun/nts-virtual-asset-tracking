@@ -88,7 +88,7 @@
     nav { display:flex; flex-wrap:wrap; gap:8px; overflow:visible; padding:10px 0; }
     nav a { flex:0 0 auto; padding:8px 11px; color:var(--muted); font-size:13px; text-decoration:none; border-radius:999px; }
     nav a:hover, nav a:focus { background:var(--surface-2); color:var(--ink); }
-    section { padding:64px 0 0; scroll-margin-top:112px; }
+    section { padding:64px 0 0; scroll-margin-top:160px; }
     .section-head { display:grid; grid-template-columns:200px 1fr; gap:30px; margin-bottom:28px; }
     .section-no { font:700 12px/1.2 ui-monospace, monospace; color:var(--blue); padding-top:9px; letter-spacing:.08em; }
     h2 { font-size:clamp(28px,4vw,44px); line-height:1.12; letter-spacing:-.04em; margin:0; }
@@ -229,6 +229,20 @@
     .case-card ol { margin:0; padding-left:19px; color:var(--muted); font-size:14px; }
     .case-card li + li { margin-top:7px; }
     .case-card .decision { margin-top:14px; padding-top:12px; border-top:1px solid var(--line); color:var(--ink); font-size:13px; }
+    .correction.evidence-card, .risk.evidence-card { cursor:pointer; }
+    .correction.evidence-card:focus-visible, .risk.evidence-card:focus-visible { outline:2px solid var(--blue); outline-offset:2px; }
+    .evidence-backdrop { position:fixed; inset:0; background:rgba(10,16,22,.45); z-index:190; }
+    .evidence-panel { position:fixed; top:0; right:0; height:100dvh; width:min(440px, 92vw); background:var(--surface); color:var(--ink); border-left:1px solid var(--line); box-shadow:var(--shadow); z-index:200; overflow-y:auto; padding:26px 26px 40px; transform:translateX(102%); transition:transform .25s ease; }
+    .evidence-panel.open { transform:none; }
+    .evidence-panel-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px; }
+    .evidence-panel-eyebrow { font:700 11px/1.2 ui-monospace, monospace; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }
+    .evidence-panel-close { flex:0 0 auto; width:34px; height:34px; border:1px solid var(--line); background:var(--surface-2); color:var(--ink); border-radius:50%; font-size:18px; line-height:1; cursor:pointer; }
+    .evidence-panel h2 { font-size:24px; line-height:1.25; margin:12px 0 0; }
+    .evidence-panel-verified { margin-top:12px; padding-top:12px; border-top:1px solid var(--line); font-size:14px; }
+    .evidence-panel p { color:var(--muted); font-size:14px; line-height:1.65; }
+    .evidence-panel-sources { margin-top:20px; padding-top:14px; border-top:1px solid var(--line); }
+    .evidence-panel-sources h3 { font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:0 0 10px; }
+    .evidence-panel-sources a { display:block; margin-top:8px; font-size:14px; }
     .cap-list { display:grid; gap:1px; background:var(--line); border:1px solid var(--line); }
     .cap-row { display:grid; grid-template-columns:200px 100px 1fr; gap:16px; padding:16px; background:var(--surface); align-items:start; }
     .cap-row strong { font-size:14px; }
@@ -393,7 +407,7 @@
       .training-step { min-height:0; }
       section { padding-top:52px; }
     }
-    @media (prefers-reduced-motion: reduce) { html { scroll-behavior:auto; } .jump { transition:none; } }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior:auto; } .jump { transition:none; } .evidence-panel { transition:none; } }
   
     /* === VISUAL_OVERHAUL_V2 · presentation-only layer; source copy intentionally untouched === */
     :root {
@@ -697,7 +711,7 @@
     section {
       position:relative;
       padding-top:92px;
-      scroll-margin-top:74px;
+      scroll-margin-top:160px;
     }
     section::before {
       content:"";
@@ -1720,6 +1734,16 @@ response.identifications[] = {
       data.nodes.filter(n=>n.step<=simStep&&n.kind==='leverage').forEach(n=>{ if(activeRules.has('service')) risk=Math.max(risk,Math.round((n.conf||.85)*100)); });
       return risk;
     }
+    // Long node labels (e.g. 'Pass-through address C', 23 chars) overflow the
+    // 132px node rect at 13px, so the text crosses the dashed border. Split
+    // labels wider than the rect into two lines at the space nearest the middle.
+    function simTitleLines(label){
+      if(label.length<=17||label.indexOf(' ')===-1)return [label];
+      let best=-1,bestDist=1e9;const mid=label.length/2;
+      for(let i=0;i<label.length;i++){ if(label[i]===' '){ const d=Math.abs(i-mid); if(d<bestDist){ bestDist=d; best=i; } } }
+      if(best===-1)return [label];
+      return [label.slice(0,best),label.slice(best+1)];
+    }
     function renderSimulation(){
       const data=simScenarios[simMode];
       const threshold=simLevel===1?0:Number(document.getElementById('simThreshold').value)/100;
@@ -1738,7 +1762,10 @@ response.identifications[] = {
         const incoming=data.edges.filter(e=>e.to===n.id), disabled=incoming.length&&incoming.every(e=>!ruleActive(e));
         const pending=n.step>simStep,filtered=disabled||(n.kind==='inferred'&&(n.conf||0)<threshold);
         const g=simEl('g',{class:'sim-node '+n.kind+(pending?' pending':'')+(filtered?' filtered':'')+(n.id===simSelected?' selected':''),transform:'translate('+(n.x-66)+' '+(n.y-30)+')',role:'button',tabindex:pending?'-1':'0','aria-label':n.label+', '+n.score});
-        g.appendChild(simEl('rect',{width:132,height:60})); g.appendChild(simEl('text',{x:66,y:25,class:'sim-node-title'},n.label)); g.appendChild(simEl('text',{x:66,y:43,class:'sim-node-score'},n.score));
+        g.appendChild(simEl('rect',{width:132,height:60}));
+        const titleLines=simTitleLines(n.label);
+        if(titleLines.length===1){ g.appendChild(simEl('text',{x:66,y:25,class:'sim-node-title'},titleLines[0])); g.appendChild(simEl('text',{x:66,y:43,class:'sim-node-score'},n.score)); }
+        else { g.appendChild(simEl('text',{x:66,y:19,class:'sim-node-title'},titleLines[0])); g.appendChild(simEl('text',{x:66,y:34,class:'sim-node-title'},titleLines[1])); g.appendChild(simEl('text',{x:66,y:50,class:'sim-node-score'},n.score)); }
         const choose=()=>{simGuideActive=false;simSelected=n.id;document.getElementById('simFocusTitle').textContent=n.label;document.getElementById('simFocusBody').textContent=n.detail;renderSimulation();};
         g.addEventListener('click',choose); g.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();choose();}}); simSVG.appendChild(g);
       });
@@ -1783,6 +1810,83 @@ response.identifications[] = {
       document.getElementById('simFocusTitle').textContent='증거 패킷 생성';document.getElementById('simFocusBody').textContent='현재 조건·휴리스틱·표시된 합성 edge를 JSON으로 내보냈다.';
     });
     setLevel(1);
+  </script>
+
+  <script>
+    /* === EVIDENCE_DETAIL_PANEL · click a correction/risk card to open its detail panel === */
+    (() => {
+      // The panel markup sits at the end of <body>, after this script, so
+      // wait for parsing to finish before looking the elements up.
+      function init(){
+      const panel = document.getElementById('evidencePanel');
+      const backdrop = document.getElementById('evidenceBackdrop');
+      const closeBtn = document.getElementById('evidencePanelClose');
+      const statusEl = document.getElementById('evidencePanelStatus');
+      const titleEl = document.getElementById('evidencePanelTitle');
+      const verifiedEl = document.getElementById('evidencePanelVerified');
+      const bodyEl = document.getElementById('evidencePanelBody');
+      const sourcesEl = document.getElementById('evidencePanelSources');
+      const linksEl = document.getElementById('evidencePanelLinks');
+      if (!panel || !backdrop) return;
+      let openCard = null;
+      function hostOf(url){ try { return new URL(url, location.href).hostname; } catch (e) { return ''; } }
+      function openPanel(card){
+        const status = card.querySelector('.tag, .severity');
+        statusEl.innerHTML = '';
+        if (status) statusEl.appendChild(status.cloneNode(true));
+        const title = card.querySelector('.from') || card.querySelector('h3');
+        titleEl.textContent = title ? title.textContent : '';
+        const verified = card.querySelector('.to');
+        if (verified) { verifiedEl.hidden = false; verifiedEl.textContent = verified.textContent; }
+        else { verifiedEl.hidden = true; verifiedEl.textContent = ''; }
+        const para = card.querySelector('p');
+        let bodyText = '';
+        if (para) { const clone = para.cloneNode(true); clone.querySelectorAll('a').forEach(a => a.remove()); bodyText = clone.textContent.trim(); }
+        bodyEl.textContent = bodyText;
+        const links = Array.from(card.querySelectorAll('a.source-link'));
+        linksEl.innerHTML = '';
+        if (links.length) {
+          sourcesEl.hidden = false;
+          links.forEach(a => {
+            const link = document.createElement('a');
+            link.href = a.href; link.target = '_blank'; link.rel = 'noopener';
+            link.textContent = '원문 보기 · ' + hostOf(a.href);
+            linksEl.appendChild(link);
+          });
+        } else { sourcesEl.hidden = true; }
+        panel.hidden = false; backdrop.hidden = false;
+        requestAnimationFrame(() => panel.classList.add('open'));
+        openCard = card;
+        closeBtn.focus();
+      }
+      function closePanel(){
+        const card = openCard;
+        panel.classList.remove('open');
+        panel.hidden = true; backdrop.hidden = true;
+        openCard = null;
+        if (card) card.focus();
+      }
+      function toggleCard(card, ev){
+        if (ev) ev.preventDefault();
+        if (openCard === card) closePanel(); else openPanel(card);
+      }
+      document.querySelectorAll('.correction, .risk').forEach(card => {
+        if (!card.querySelector('a.source-link')) return;
+        card.classList.add('evidence-card');
+        card.setAttribute('tabindex', '0');
+        card.setAttribute('role', 'button');
+        card.addEventListener('click', ev => toggleCard(card, ev));
+        card.addEventListener('keydown', ev => {
+          if (ev.key === 'Enter' || ev.key === ' ') toggleCard(card, ev);
+        });
+      });
+      closeBtn.addEventListener('click', closePanel);
+      backdrop.addEventListener('click', closePanel);
+      document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && openCard) closePanel(); });
+      }
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+      else init();
+    })();
   </script>
 
   <script>
@@ -1892,5 +1996,20 @@ response.identifications[] = {
       }
     });
   </script>
+  <div class="evidence-backdrop" id="evidenceBackdrop" hidden></div>
+  <aside class="evidence-panel" id="evidencePanel" role="dialog" aria-modal="true" aria-labelledby="evidencePanelTitle" hidden>
+    <div class="evidence-panel-head">
+      <span class="evidence-panel-eyebrow">증거 상세</span>
+      <button type="button" class="evidence-panel-close" id="evidencePanelClose" aria-label="닫기">×</button>
+    </div>
+    <div id="evidencePanelStatus"></div>
+    <h2 id="evidencePanelTitle"></h2>
+    <p class="evidence-panel-verified" id="evidencePanelVerified" hidden></p>
+    <p id="evidencePanelBody"></p>
+    <div class="evidence-panel-sources" id="evidencePanelSources" hidden>
+      <h3>출처</h3>
+      <div id="evidencePanelLinks"></div>
+    </div>
+  </aside>
 </body>
 </html>
